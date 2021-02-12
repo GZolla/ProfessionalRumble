@@ -1,11 +1,17 @@
 # My Personal Project
 
 ## Program Description
-A pokemon-style game but:
-- Instead of pokemon, its professionals(e.g engineer and teacher instead of pikachu and meowth)
-- Without any mechanics that involve luck.
+A turn-based game of strategy where two teams of professional use a combination of moves/actions to defeat the opponent,
+the team with the last professional standing wins.
+Moves can:
+ - Cause damage to the opponent
+ - Change its stats
+ - Inflict statuses
+ - Other combinations of these effects
 
-Aimed for those that enjoy pokemon but seek a similar game based purely on strategy, and not randomness.
+
+
+Based on pokemon battles, its target audience is those that seek a similar game based purely on strategy, and not randomness.
 This is a collective idea I had with a friend but would love give it *actual* life through a desktop app.
 
 ##User Stories
