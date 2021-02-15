@@ -40,13 +40,38 @@ public class StatModifier extends Counter {
         for (Stat stat : stats) {
             int oldStage = target.getStage(stat,false);
             int newStage = Math.max(Math.min(oldStage + stages,6),-6);
+
+            if (newStage != oldStage) {
+                String prompt = target.getFullName() + "'s " + stat.getName() + (newStage > oldStage ? " in" : " de");
+                System.out.println(prompt + "creased" + (stages > 1 ? " drastically." : "."));
+            }
             target.setStage(stat,newStage);
         }
     }
 
+
     @Override
-    //EFFECT: Return exact copy of this, so as to set a counter independent to this
-    public Counter getCopy() {
-        return new StatModifier(targetFoe,stats,stages,waitTurns);
+    public String getDescription() {
+        String statsMod;
+        if (stats.length > 1) {
+            statsMod = "";
+            for (int i = 0; i < stats.length - 1; i++) {
+                statsMod += stats[i].getName() + ", ";
+            }
+            statsMod = statsMod.substring(0,statsMod.length() - 2) + "&" + stats[stats.length - 1].name();
+        } else {
+            statsMod = stats[0].getName();
+        }
+
+        String action;
+        if (waitTurns == -1) {
+            String change = stages < 0 ? "Reduces " : "Increases ";
+            String target = targetFoe ? "opponent" : "user";
+            action = change + target;
+        } else {
+            action =  "After " + waitTurns + " uses, if used on next turn it reduces opponent";
+        }
+        return action + "'s " + statsMod + "by " + Math.abs(stages) + " stages";
+
     }
 }

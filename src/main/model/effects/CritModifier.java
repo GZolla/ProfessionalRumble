@@ -26,7 +26,16 @@ public class CritModifier implements Effect {
         int min = target.getSelectedProfessional().getVolatileStatus().contains(Volatile.UNLCKY) ? 0 : -1;
         int newPoints = Math.min(8,Math.max(min,critPoints + currentPoints));
 
+
+
         target.setCritCounter(newPoints);
 
+    }
+
+    @Override
+    public String getDescription() {
+        String target = targetFoe ? "Opponent" : "User";
+        String change = critPoints < 0 ? "reduced" : "increased";
+        return target + "'s critical points are " + change + " by "  + Math.abs(critPoints) + " points.";
     }
 }

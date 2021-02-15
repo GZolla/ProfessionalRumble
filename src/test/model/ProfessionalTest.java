@@ -21,76 +21,46 @@ import static ui.Main.PLAYER_2;
 
 public class ProfessionalTest {
 
-    private Professional compScientist;
-    private Professional president;
-    private Professional centralBankChair;
-    private Professional selfDefenseCoach;
-    private Professional dictator;
-    private Professional quarterback;
-
-    private Professional compScientist2;
-    private Professional president2;
-    private Professional centralBankChair2;
-    private Professional selfDefenseCoach2;
-    private Professional dictator2;
-    private Professional quarterback2;
-
     @BeforeEach
+    //Refresh teams to default
     public void runBefore(){
-        Move[] compSciMoves = new Move[]{CABLE_WHIP,COMPROMISE_NETWORK,KEYBOARD_SLAM,WORKOUT};
-        Move[] presiMoves = new Move[]{PRESI_PUNCH,ICBM_STRIKE,SURVEILL,OPTIMIZATION};
-        Move[] cbcMoves = new Move[]{REITERATIVE_PUNCH,ICBM_STRIKE,SURVEILL,OPTIMIZATION};
-        Move[] coachMoves = new Move[]{BACKPACK_SMACK,DISOBEDIENCE_SLAP, DOMINATE,REDCARD_FOUL};
-        Move[] dictMoves = new Move[]{ICBM_STRIKE,HYPEREXAMINE,LONG_AWAITED_NOVEL,CORPORAL_PUNISHMENT};
-        Move[] qbMoves = new Move[]{WORKOUT,ACCELERATE,FRIENDLY_MATCH,MOMENTUM_COLLISION};
-
-        compScientist = new Professional(true, COMPUTER_SCIENTIST,compSciMoves);
-        president = new Professional(true, PRESIDENT,presiMoves);
-        centralBankChair = new Professional(true, CENTRAL_BANK_CHAIR,cbcMoves);
-        selfDefenseCoach = new Professional(true, SELFDEFENSE_COACH,coachMoves);
-        dictator = new Professional(true,DICTATOR,dictMoves);
-        quarterback = new Professional(true, QUARTERBACK,qbMoves);
-
-        PLAYER_1.setTeam(new Professional[]{compScientist,president,centralBankChair,selfDefenseCoach,dictator,quarterback2});
-
-        president2 = new Professional(false, PRESIDENT,presiMoves);
-        centralBankChair2 = new Professional(false, CENTRAL_BANK_CHAIR,cbcMoves);
-        compScientist2 = new Professional(false, COMPUTER_SCIENTIST,compSciMoves);
-        selfDefenseCoach2 = new Professional(false, SELFDEFENSE_COACH,coachMoves);
-        dictator2 = new Professional(false,DICTATOR,dictMoves);
-        quarterback2 = new Professional(false, QUARTERBACK,qbMoves);
-        PLAYER_2.setTeam(new Professional[]{compScientist2,president2,centralBankChair2,selfDefenseCoach2,dictator2,quarterback2});
+        PLAYER_1.setTeam(new Player("Paul",true).getTeam());
+        PLAYER_2.setTeam(new Player("Paul",false).getTeam());
     }
+
 
     //--- MOVES --------------------------------------------------------------------------------------------------------
 
     @Test
     public void testUseDamagingMoveAndGetLastMoveDamage(){
-        Professional foe = PLAYER_2.getSelectedProfessional();
-
         PLAYER_1.setSelectedProfessional(0);
-        compScientist.useMove(2);
+        Professional user =  PLAYER_1.getSelectedProfessional();
+        Professional foe = PLAYER_2.getSelectedProfessional();
+        user.useMove(2);
 
-        int moveDamage = compScientist.getLastMoveDamage(foe);
-        assertEquals(KEYBOARD_SLAM.getDamage(compScientist, foe),moveDamage);
+        int moveDamage = user.getLastMoveDamage(foe);
+        assertEquals(KEYBOARD_SLAM.getDamage(user, foe),moveDamage);
         assertEquals(foe.getBase().getLife() - moveDamage,foe.getLife());
     }
     @Test
     public void testUseDamagingMoveCritical(){
         PLAYER_2.setSelectedProfessional(3);
+        PLAYER_1.setSelectedProfessional(0);
         Professional user = PLAYER_2.getSelectedProfessional();
         Professional foe = PLAYER_1.getSelectedProfessional();
 
         user.addVolatileStatus(CRITIC);
+        assertEquals(COMPUTER_SCIENTIST.getLife(), foe.getLife());
         user.useMove(2);
-        //selfDefenseCoach2 now hasUsedCritical == false
+        //selfDefenseCoach2 now has not got CRITICAL volatile status
+
         double moveDamage = Math.round(COMPUTER_SCIENTIST.getLife() - foe.getLife());
         assertEquals(Math.round(DOMINATE.getDamage(user, foe) * 1.5), moveDamage);
     }
 
     @Test
     public void testSetAndGetMoves(){
-
+        Professional president = PLAYER_2.getTeam()[1];
         Move[] presiMoves = president.getMoves();
 
         assertEquals(PRESI_PUNCH,presiMoves[0]);
@@ -100,10 +70,9 @@ public class ProfessionalTest {
 
         Move[] dictMoves = new Move[]{ICBM_STRIKE,HYPEREXAMINE,LONG_AWAITED_NOVEL,CORPORAL_PUNISHMENT};
 
-        president.setMoves(dictMoves);
+        president.setMove(0,ICBM_STRIKE);
+        president.setMove(3,CORPORAL_PUNISHMENT);
         assertEquals(ICBM_STRIKE,president.getMoves()[0]);
-        assertEquals(HYPEREXAMINE,president.getMoves()[1]);
-        assertEquals(LONG_AWAITED_NOVEL,president.getMoves()[2]);
         assertEquals(CORPORAL_PUNISHMENT,president.getMoves()[3]);
     }
 
@@ -111,26 +80,30 @@ public class ProfessionalTest {
 
     @Test
     public void testSetStage() {
+        Professional quarterback = PLAYER_1.getTeam()[5];
         quarterback.setStage(STR,1);
         quarterback.setStage(RES,6);
         assertEquals(1,quarterback.getStrengthStage());
         assertEquals(6,quarterback.getResistanceStage());
 
-        dictator2.setStage(SPR,3);
-        dictator2.setStage(SPS,-2);
-        dictator2.setStage(SPE,-5);
-        assertEquals(3,dictator2.getSpecialResistanceStage());
-        assertEquals(-2,dictator2.getSpecialStrengthStage());
-        assertEquals(-5,dictator2.getSpeedStage());
+        Professional dictator = PLAYER_2.getTeam()[4];
+        dictator.setStage(SPR,3);
+        dictator.setStage(SPS,-2);
+        dictator.setStage(SPE,-5);
+        assertEquals(3,dictator.getSpecialResistanceStage());
+        assertEquals(-2,dictator.getSpecialStrengthStage());
+        assertEquals(-5,dictator.getSpeedStage());
     }
 
     @Test
     public void testGetStage() {
+        Professional centralBankChair = PLAYER_1.getTeam()[4];
         centralBankChair.setStage(STR,2);
         centralBankChair.setStage(RES,4);
         assertEquals(2,centralBankChair.getStage(STR,false));
         assertEquals(4,centralBankChair.getStage(RES,false));
 
+        Professional president2 = PLAYER_2.getTeam()[4];
         president2.setStage(SPR,-6);
         president2.setStage(SPS,-1);
         assertEquals(-6,president2.getStage(SPR,false));
@@ -140,12 +113,14 @@ public class ProfessionalTest {
 
     @Test
     public void testGetStageUserUsedCritical(){
+        Professional centralBankChair = PLAYER_1.getTeam()[4];
         centralBankChair.setStage(SPS,2);
         centralBankChair.setStage(STR,4);
         centralBankChair.addVolatileStatus(CRITIC);
         assertEquals(2,centralBankChair.getStage(SPS,false));
         assertEquals(4,centralBankChair.getStage(STR,false));
 
+        Professional president = PLAYER_2.getTeam()[4];
         president.setStage(SPS,-6);
         president.setStage(STR,-1);
         president.addVolatileStatus(CRITIC);
@@ -156,11 +131,13 @@ public class ProfessionalTest {
 
     @Test
     public void testGetStageFoeUsedCritical(){
+        Professional centralBankChair = PLAYER_1.getTeam()[4];
         centralBankChair.setStage(SPR,2);
         centralBankChair.setStage(RES,4);
         assertEquals(0,centralBankChair.getStage(SPR,true));
         assertEquals(0,centralBankChair.getStage(RES,true));
 
+        Professional president = PLAYER_2.getTeam()[4];
         president.setStage(SPR,-6);
         president.setStage(RES,-1);
         assertEquals(-6,president.getStage(SPR,true));
@@ -169,9 +146,11 @@ public class ProfessionalTest {
 
     @Test
     public void testGetRealStatStage() {
+        Professional selfDefenseCoach = PLAYER_2.getTeam()[3];
         selfDefenseCoach.setStage(RES,2);
         assertEquals(2*SELFDEFENSE_COACH.getResistance(),selfDefenseCoach.getRealStat(RES,false));
 
+        Professional compScientist = PLAYER_1.getTeam()[0];
         compScientist.setStage(STR,-1);
         assertEquals(Math.round(2.0 * COMPUTER_SCIENTIST.getStrength() / 3),Math.round(compScientist.getRealStat(STR,false)));
 
@@ -179,12 +158,15 @@ public class ProfessionalTest {
 
     @Test
     public void testGetRealStatNVS() {
+        Professional president = PLAYER_1.getTeam()[1];
         president.setNonVolatileStatus(INJUR);
         assertEquals(PRESIDENT.getStrength()/2,president.getRealStat(STR,false));
 
+        Professional centralBankChair = PLAYER_2.getTeam()[2];
         centralBankChair.setNonVolatileStatus(DEPRE);
         assertEquals(CENTRAL_BANK_CHAIR.getSpecialStrengh()/2,centralBankChair.getRealStat(SPS,false));
 
+        Professional selfDefenseCoach = PLAYER_2.getTeam()[3];
         selfDefenseCoach.setNonVolatileStatus(DEMOR);
         assertEquals(SELFDEFENSE_COACH.getSpeed()/2,selfDefenseCoach.getRealStat(SPE,false));
     }
@@ -195,6 +177,7 @@ public class ProfessionalTest {
 
     @Test
     public void testGetAddRemoveVS(){
+        Professional president = PLAYER_1.getTeam()[4];
         assertEquals(new ArrayList<Volatile>(),president.getVolatileStatus());
         president.addVolatileStatus(NAUSEA);
         president.addVolatileStatus(CHARGE);
@@ -212,6 +195,7 @@ public class ProfessionalTest {
 
     @Test
     public void testCheckNonVolatileStatusSick(){
+        Professional compScientist = PLAYER_1.getTeam()[0];
         compScientist.setNonVolatileStatus(SICK);
         int baseLife =COMPUTER_SCIENTIST.getLife();
 
@@ -225,17 +209,19 @@ public class ProfessionalTest {
 
     @Test
     public void testCheckNonVolatileStatusInjur(){
+        Professional president = PLAYER_1.getTeam()[1];
         president.setNonVolatileStatus(INJUR);
         int baseLife =PRESIDENT.getLife();
 
         president.checkNonVolatileStatus();
-        assertEquals( baseLife - Math.round(baseLife/16),president.getLife());
+        assertEquals( baseLife - Math.floor(baseLife/16),president.getLife());
         president.checkNonVolatileStatus();
-        assertEquals( baseLife - Math.round(baseLife * 2/16),president.getLife());
+        assertEquals( baseLife - Math.floor(baseLife * 2/16),president.getLife());
     }
 
     @Test
     public void testCheckNonVolatileStatusDepre(){
+        Professional dictator = PLAYER_1.getTeam()[4];
         dictator.setNonVolatileStatus(DEPRE);
         int baseLife =DICTATOR.getLife();
 
@@ -248,6 +234,7 @@ public class ProfessionalTest {
     @Test
     public void testUpdateNonVolatileStatusUnlucky() {
         PLAYER_1.setSelectedProfessional(3); //self defense coach
+        Professional selfDefenseCoach = PLAYER_1.getTeam()[3];
 
         selfDefenseCoach.setNonVolatileStatus(UNEMP);
         assertEquals(UNEMP,selfDefenseCoach.getNonVolatileStatus());
@@ -263,81 +250,56 @@ public class ProfessionalTest {
     @Test
     public void testUpdateCounters(){
 
-
-        compScientist.addCounter(new StatModifier(true,STR,1,1));
-        compScientist.addCounter(new StatModifier(true,RES,2,2));
-        compScientist.addCounter(new StatusInflictor(INJUR,3));
+        Professional compScientist = PLAYER_2.getTeam()[0];
+        compScientist.setMoveCounter(0,0);
+        compScientist.setMoveCounter(1,2);
+        compScientist.setMoveCounter(2,4);
+        compScientist.setMoveCounter(3,5);
         compScientist.updateCounters();
 
-        ArrayList<Counter> updateCounters = compScientist.getCounters();
-        assertEquals(0,updateCounters.get(0).getWaitTurns());
-        assertEquals(1,updateCounters.get(1).getWaitTurns());
-        assertEquals(2,updateCounters.get(2).getWaitTurns());
-        assertTrue(updateCounters.get(0).isAble());
 
-    }
+        assertEquals(-1,compScientist.getMoveCounters()[0]);
+        assertEquals(2,compScientist.getMoveCounters()[1]);
+        assertEquals(4,compScientist.getMoveCounters()[2]);
+        assertEquals(5,compScientist.getMoveCounters()[3]);
 
-    @Test
-    public void testUpdateCountersRemove(){
-        compScientist.addCounter(new StatModifier(true,STR,1,0));
-        compScientist.addCounter(new StatModifier(true,STR,1,1));
-        compScientist.updateCounters();
-
-        ArrayList<Counter> updateCounters = compScientist.getCounters();
-        assertEquals(1,updateCounters.size());
-        assertEquals(1,updateCounters.get(0).getWindowTurns());
-    }
-    @Test
-    public void testUseCounter(){
-        PLAYER_1.setSelectedProfessional(4);
-        dictator.addCounter(new StatusInflictor(DRAIND,0));
-        dictator.addCounter(new StatModifier(true,STR,2,0));
-
-        dictator.useCounter(0);
-        assertTrue(dictator.getVolatileStatus().contains(DRAIND));
-    }
-
-    @Test
-    public void testGetAbleCounters(){
-        dictator.addCounter(new StatusInflictor(DRAIND,1));
-        dictator.addCounter(new StatusInflictor(UNEMP,1));
-        dictator.addCounter(new StatusInflictor(UNEMP,3));
-        dictator.addCounter(new StatModifier(true,STR,2,2));
-
-        assertEquals(0,dictator.getAbleCounters().size());
-        dictator.updateCounters();
-        assertEquals(2,dictator.getAbleCounters().size());
     }
 
     //--- OTHER --------------------------------------------------------------------------------------------------------
 
     @Test
     public void testTakeDamage() {
-        president.takeDamage(50);
+        Professional president = PLAYER_1.getTeam()[1];
+        president.takeDamage(50,1);
         assertEquals(PRESIDENT.getLife()-50,president.getLife());
 
-        compScientist.takeDamage(60);
+        Professional compScientist = PLAYER_2.getTeam()[0];
+        compScientist.takeDamage(60,1);
         assertEquals(COMPUTER_SCIENTIST.getLife()-60,compScientist.getLife());
     }
     @Test
     public void testTakeDamageFaints() {
-        president.takeDamage(PRESIDENT.getLife());
+        Professional president = PLAYER_1.getTeam()[1];
+        president.takeDamage(PRESIDENT.getLife(),1);
         assertEquals(0,president.getLife());
         assertEquals(FAINT,president.getNonVolatileStatus());
 
-        compScientist.takeDamage(COMPUTER_SCIENTIST.getLife() * 2);
+        Professional compScientist = PLAYER_2.getTeam()[0];
+        compScientist.takeDamage(COMPUTER_SCIENTIST.getLife() * 2,1);
         assertEquals(0,compScientist.getLife());
         assertEquals(FAINT,compScientist.getNonVolatileStatus());
     }
 
     @Test
     public void testIsBranch() {
+        Professional compScientist = PLAYER_2.getTeam()[0];
         assertTrue(compScientist.isBranch(TECHNO));
         assertFalse(compScientist.isBranch(GOVERN));
     }
 
     @Test
     public void testIsBranchTwoBranches() {
+        Professional centralBankChair = PLAYER_1.getTeam()[2];
         assertTrue(centralBankChair.isBranch(GOVERN));
         assertTrue(centralBankChair.isBranch(NUMBER));
         assertFalse(centralBankChair.isBranch(SCIENCE));
@@ -345,6 +307,8 @@ public class ProfessionalTest {
 
     @Test
     public void testCheckEffectiveness() {
+        Professional compScientist = PLAYER_2.getTeam()[0];
+        Professional president = PLAYER_1.getTeam()[1];
         assertEquals(0.5,compScientist.checkEffectiveness(SPORT));
         assertEquals(2, compScientist.checkEffectiveness(MANUAL));
         assertEquals(1, president.checkEffectiveness(SCIENCE));
@@ -352,6 +316,8 @@ public class ProfessionalTest {
 
     @Test
     public void testCheckEffectivenessTwoBranches() {
+        Professional selfDefenseCoach = PLAYER_1.getTeam()[3];
+        Professional centralBankChair = PLAYER_1.getTeam()[2];
         assertEquals(2,centralBankChair.checkEffectiveness(SPORT));
         assertEquals(0.25, centralBankChair.checkEffectiveness(ENTERT));
         assertEquals(4, selfDefenseCoach.checkEffectiveness(SECURI));
@@ -359,6 +325,7 @@ public class ProfessionalTest {
     }
     @Test
     public void tesCheckEffectivenessFutile(){
+        Professional selfDefenseCoach = PLAYER_1.getTeam()[3];
         assertEquals(0, selfDefenseCoach.checkEffectiveness(GOVERN));
         assertEquals(0, selfDefenseCoach.checkEffectiveness(NUMBER));
     }
@@ -366,12 +333,16 @@ public class ProfessionalTest {
     //--- ACCESSORS/MUTATORS NOT TESTED ABOVE --------------------------------------------------------------------------
     @Test
     public void testIsLedByPlayer1() {
+        Professional dictator2 = PLAYER_2.getTeam()[4];
+        Professional dictator = PLAYER_1.getTeam()[4];
         assertFalse(dictator2.isLedByPlayer1());
         assertTrue(dictator.isLedByPlayer1());
     }
 
     @Test
     public void testGetName() {
+
+        Professional dictator2 = PLAYER_2.getTeam()[4];
         assertEquals(DICTATOR.getName(),dictator2.getName());
     }
 

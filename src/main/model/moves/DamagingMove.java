@@ -1,9 +1,12 @@
 package model.moves;
 
+import model.Player;
 import model.data.Branch;
 import model.Professional;
+import model.data.NonVolatile;
 import model.data.Stat;
 import model.effects.*;
+import ui.UiManager;
 
 import static model.data.Branch.*;
 import static model.data.NonVolatile.*;
@@ -141,9 +144,21 @@ public enum DamagingMove implements Move {
             user.addVolatileStatus(CHARGE);
         } else {
             int dmg = getDamage(user, foe);
-            foe.takeDamage(dmg);
-            if (effect != null && dmg != 0) {
+            foe.takeDamage(dmg, foe.checkEffectiveness(branch));
+            if (user.getVolatileStatus().contains(CRITIC)) {
+                System.out.println("It was a critical hit!");
+            }
+            if (effect != null && dmg != 0 && foe.getNonVolatileStatus() != FAINT) {
                 effect.apply(usedByPlayer1);
+            }
+            Player leader = usedByPlayer1 ? PLAYER_1 : PLAYER_2;
+
+
+            if (!user.getVolatileStatus().contains(UNLCKY)) {
+                leader.setCritCounter(Math.min(leader.getCritCounter() + 1,8));
+            } else {
+                String prompt = user.getName() + "'s unluckiness  prevented ";
+                System.out.println(prompt + leader.getName() + " from gaining critical points.");
             }
         }
 
@@ -168,5 +183,65 @@ public enum DamagingMove implements Move {
 
         return (int) Math.floor(baseMultiplier * sameBranchMultiplier * effectiveness);
 
+    }
+
+    //EFFECT:Return name, branch, power, type, and effect description of all values in DamagingMoves
+    public static String[][] toTable() {
+        DamagingMove[] values = DamagingMove.values();
+        String[][] table = new String[values.length][6];
+
+        for (int i = 0; i < values.length; i++) {
+            table[i][0] = i + "";
+            table[i][1] = values[i].name;
+            table[i][2] = values[i].branch.name();
+            table[i][3] = values[i].power + "";
+            table[i][4] = values[i].getType();
+            Effect effect = values[i].effect;
+
+            if (values[i].charges) {
+                table[i][5] = "1 turn charge needed before use.";
+            } else if (effect == null) {
+                table[i][5] = "-";
+            } else {
+                table[i][5] = effect.getDescription();
+            }
+
+        }
+
+        return table;
+    }
+
+    //EFFECT: Return the headers for the table described above
+    public static String[] getHeaders() {
+        return new String[]{"ID","Name","Branch","Power","Type","Added Effect"};
+    }
+
+    public int getPower() {
+        return power;
+    }
+
+    //EFFECT: Return "Physical" if physical, else "Special"
+    public String getType() {
+        return physical ? "Physical" : "Special";
+    }
+
+    @Override
+    public int getPriority() {
+        return priority;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public Effect getEffect() {
+        return effect;
+    }
+
+    @Override
+    public Branch getBranch() {
+        return branch;
     }
 }

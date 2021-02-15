@@ -4,6 +4,7 @@ import model.Professional;
 import model.data.Branch;
 import model.effects.*;
 import model.effects.StatModifier;
+import ui.UiManager;
 
 import static model.data.Branch.*;
 import static model.data.NonVolatile.*;
@@ -48,5 +49,48 @@ public enum StatusMove implements Move {
     //EFFECT: apply the added effect
     public void use(boolean usedByPlayer1) {
         effect.apply(usedByPlayer1);
+    }
+
+
+
+    //EFFECT: Return name, branch, and description of effect for all values
+    public static String[][] toTable() {
+        StatusMove[] values = StatusMove.values();
+        String[][] table = new String[values.length][4];
+
+        for (int i = 0; i < values.length; i++) {
+            table[i][0] = i + "";
+            table[i][1] = values[i].name;
+            table[i][2] = values[i].branch.name();
+            table[i][3] = values[i].effect.getDescription();
+        }
+
+        return table;
+    }
+
+    //EFFECT: Return the headers for the table described above
+    public static String[] getHeaders() {
+        return new String[]{"ID","Name","Branch","Added Effect"};
+    }
+
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public Effect getEffect() {
+        return effect;
+    }
+
+    @Override
+    public Branch getBranch() {
+        return branch;
+    }
+
+    @Override
+    public int getPriority() {
+        return priority;
     }
 }

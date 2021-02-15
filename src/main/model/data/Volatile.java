@@ -25,4 +25,9 @@ public enum Volatile implements Status {
     public int getTurnLimit() {
         return turnLimit;
     }
+
+    @Override
+    public String getName() {
+        return name;
+    }
 }

@@ -22,11 +22,20 @@ public class DefeatCondition implements Effect {
         Professional user = getUser(usedByPlayer1);
         Professional foe = getUser(!usedByPlayer1);
         if (foe.getNonVolatileStatus() != FAINT) {
+            String pre = "After failing to defeat " + foe.getName() + " " + user.getName();
             if (causeUMP) {
+                System.out.println(pre + " became unemployed.");
                 user.setNonVolatileStatus(UNEMP);
             } else {
-                user.takeDamage((int) Math.floor(2.0 * user.getLastMoveDamage(foe) / 3));
+                System.out.println(pre + " suffered recoil.");
+                user.takeDamage((int) Math.floor(2.0 * user.getLastMoveDamage(foe) / 3),1);
             }
         }
+    }
+
+    @Override
+    public String getDescription() {
+        String action = causeUMP ? "becomes unemployed" : " takes 2/3 of the damage caused to foe as recoil";
+        return "If the foe is not defeated after this move, user " + action + ".";
     }
 }

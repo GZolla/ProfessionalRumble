@@ -2,7 +2,9 @@ package model;
 
 import model.data.Stat;
 import model.data.Volatile;
+import model.moves.DamagingMove;
 import model.moves.Move;
+import model.moves.StatusMove;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -187,15 +189,14 @@ public class MovesTest {
         Professional user = PLAYER_2.getSelectedProfessional();
         Professional foe = PLAYER_1.getSelectedProfessional();
         user.useMove(0); //CABLE WHIP
-        assertEquals(1,user.getCounters().size());
-        assertEquals(0,user.getAbleCounters().size());
-        user.updateCounters(); // Make counter able
-        assertEquals(1,user.getAbleCounters().size());
+        assertEquals(0,user.getMoveCounters()[0]);//Already charged
+        assertEquals(0,user.getResistanceStage());
+        user.useMove(0); // Effect -1 RES
 
         foe.useMove(1);//STARVE
+
         assertEquals(-2,user.getSpecialResistanceStage());
 
-        user.useCounter(0); //Effect: RES -1 on foe
         assertEquals(-1,foe.getResistanceStage());
         assertEquals(0,user.getSpeedStage());
     }
@@ -228,7 +229,7 @@ public class MovesTest {
         assertEquals(0,user.getSpecialResistanceStage());
         assertEquals(0,user.getSpeedStage());
 
-        assertEquals(1,user.getCounters().size());
+        assertEquals(0,user.getMoveCounters()[2]);
     }
 
     @Test
@@ -241,8 +242,9 @@ public class MovesTest {
 
         p2.useMove(2);//CONFUSING_PROBLEM (status) inflicts NAUSEA
         p1.useMove(1); //STATIC_SLAP (damaging) inflicts FLINCH
-        p1.updateCounters();
-        p1.useCounter(0);
+        p1.useMove(1); //Charge final
+        p1.useMove(1); //Use effect
+
 
         assertTrue(p1.getVolatileStatus().contains(Volatile.NAUSEA));
         assertTrue(p2.getVolatileStatus().contains(Volatile.FLINCH));
@@ -257,9 +259,10 @@ public class MovesTest {
         Professional p2 = PLAYER_2.getSelectedProfessional();
 
         p1.useMove(3);//STAMPEDE
-        p1.updateCounters();
-        p1.updateCounters();//Counter now able
-        p1.useCounter(0);
+        p2.takeDamage(-100,1);//to prevent faint
+        p1.useMove(3);//charge final
+        p2.takeDamage(-100,1);//to prevent faint
+        p1.useMove(3);//use effect
 
         assertEquals(INJUR,p2.getNonVolatileStatus());
 
@@ -306,9 +309,41 @@ public class MovesTest {
         p1.updateVolatileStatus(); //This turn would get hit by nausea
         p1.useMove(1); //STATIC_SLAP (damaging) inflicts FLINCH
 
-        assertEquals(0,p1.getCounters().size());//The counter was not set
+        assertEquals(-1,p1.getMoveCounters()[1]);//The counter was not set
         int moveDMG =(int) Math.round(10 * p1.getRealStat(Stat.STR,false) / p1.getRealStat(Stat.RES,false));
         assertEquals(CENTRAL_BANK_CHAIR.getLife() - p1.getLife(), moveDMG);
+    }
+
+    @Test
+    public void testToTableAndGetHeadersLength(){
+        String[][] status = StatusMove.toTable();
+        String[][] damaging = DamagingMove.toTable();
+        String[] statusH = StatusMove.getHeaders();
+        String[] damagingH = DamagingMove.getHeaders();
+
+        assertEquals(StatusMove.values().length,status.length);
+        assertEquals(DamagingMove.values().length,damaging.length);
+
+        assertEquals(status[0].length,statusH.length);
+        assertEquals(damaging[0].length,damagingH.length);
+
+    }
+
+    @Test
+    public void testToTableOrder() {
+        String[][] status = StatusMove.toTable();
+        String[][] damaging = DamagingMove.toTable();
+
+        assertEquals(5 + "",status[5][0]);
+        assertEquals(StatusMove.values()[2].getName(),status[2][1]);
+        assertEquals(StatusMove.values()[0].getBranch().name(),status[0][2]);
+
+        assertEquals(15 + "",damaging[15][0]);
+        assertEquals(DamagingMove.values()[30].getName(),damaging[30][1]);
+        assertEquals(DamagingMove.values()[21].getBranch().name(),damaging[21][2]);
+        assertEquals(DamagingMove.values()[27].getPower() + "",damaging[27][3]);
+        assertEquals(DamagingMove.values()[18].getType(),damaging[18][4]);
+        assertEquals(DamagingMove.values()[3].getEffect().getDescription(),damaging[3][5]);
     }
 
 }
