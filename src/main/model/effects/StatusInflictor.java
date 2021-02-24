@@ -12,15 +12,15 @@ import static ui.Main.PLAYER_1;
 import static ui.Main.PLAYER_2;
 
 //Effect that inflicts a status to target professional,
-public class StatusInflictor extends Counter {
+public class StatusInflictor extends CounterSetter {
 
     private Status status;
 
 
     //EFFECT: create a status inflictor effect, set windowTurns to 1
-    public StatusInflictor(Status status, int waitTurns) {
+    public StatusInflictor(Status status, int chargeTurns) {
         this.status = status;
-        this.waitTurns = waitTurns;
+        this.chargeTurns = chargeTurns;
         windowTurns = 1;
     }
 
@@ -45,10 +45,10 @@ public class StatusInflictor extends Counter {
         if (status == DRAIND) {
             return "User will not be able to move next turn.";
         }
-        if (waitTurns == -1) {
+        if (chargeTurns == -1) {
             action = "Inflicts";
         } else {
-            action =  "Has a " + waitTurns + " counter(1 turn window) to inflict";
+            action =  "Has a " + chargeTurns + " counter(1 turn window) to inflict";
         }
         return action + " opponent with " + status.getName();
     }

@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import static model.data.ProfessionalBase.*;
 import static model.data.Volatile.CRITIC;
-import static model.moves.DamagingMove.*;
-import static model.moves.StatusMove.*;
+import static model.moves.Damaging.*;
+import static model.moves.Status.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static ui.Main.PLAYER_1;
 import static ui.Main.PLAYER_2;

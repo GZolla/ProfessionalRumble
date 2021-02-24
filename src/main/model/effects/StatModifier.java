@@ -7,7 +7,7 @@ import static ui.Main.PLAYER_1;
 import static ui.Main.PLAYER_2;
 
 //Effect that changes the stages of target professional, or set a counter do apply the effect later
-public class StatModifier extends Counter {
+public class StatModifier extends CounterSetter {
 
     private Stat[] stats;
     private int stages;
@@ -15,20 +15,20 @@ public class StatModifier extends Counter {
 
 
     //EFFECT: Create stat modifier when given an array of Stats, set windowTurns to 1
-    public StatModifier(boolean targetFoe, Stat[] stats, int stages, int waitTurns) {
+    public StatModifier(boolean targetFoe, Stat[] stats, int stages, int chargeTurns) {
         this.stats = stats;
         this.stages = stages;
         this.targetFoe = targetFoe;
-        this.waitTurns = waitTurns;
+        this.chargeTurns = chargeTurns;
         windowTurns = 1;
     }
 
     //EFFECT: Create stat modifier when given a single Stat, set windowTurns to 1
-    public StatModifier(boolean targetFoe, Stat stat, int stages, int waitTurns) {
+    public StatModifier(boolean targetFoe, Stat stat, int stages, int chargeTurns) {
         this.stats = new Stat[]{stat};
         this.stages = stages;
         this.targetFoe = targetFoe;
-        this.waitTurns = waitTurns;
+        this.chargeTurns = chargeTurns;
         windowTurns = 1;
     }
 
@@ -64,12 +64,12 @@ public class StatModifier extends Counter {
         }
 
         String action;
-        if (waitTurns == -1) {
+        if (chargeTurns == -1) {
             String change = stages < 0 ? "Reduces " : "Increases ";
             String target = targetFoe ? "opponent" : "user";
             action = change + target;
         } else {
-            action =  "After " + waitTurns + " uses, if used on next turn it reduces opponent";
+            action =  "After " + chargeTurns + " uses, if used on next turn it reduces opponent";
         }
         return action + "'s " + statsMod + "by " + Math.abs(stages) + " stages";
 

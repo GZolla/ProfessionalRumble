@@ -3,9 +3,9 @@ package ui;
 import model.Player;
 import model.Professional;
 import model.data.ProfessionalBase;
-import model.moves.DamagingMove;
+import model.moves.Damaging;
 import model.moves.Move;
-import model.moves.StatusMove;
+import model.moves.Status;
 
 import java.util.Scanner;
 
@@ -116,14 +116,14 @@ public class TeamBuilder {
             if (type == -1) {
                 break;
             } else {
-                String[][] values = type == 0 ? StatusMove.toTable() : DamagingMove.toTable();
-                String[] headers = type == 0 ? StatusMove.getHeaders() : DamagingMove.getHeaders();
+                String[][] values = type == 0 ? Status.toTable() : Damaging.toTable();
+                String[] headers = type == 0 ? Status.getHeaders() : Damaging.getHeaders();
 
                 printTable(values,headers);
                 int newMoveInd = largeOptions("Select new move.",values.length,true);
 
                 if (newMoveInd != -1) {
-                    Move move = (type == 0 ? StatusMove.values() : DamagingMove.values())[newMoveInd];
+                    Move move = (type == 0 ? Status.values() : Damaging.values())[newMoveInd];
                     if (p1.hasMove(move)) {
                         System.out.println("Move already assigned to Professional");
                     } else {

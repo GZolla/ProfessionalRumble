@@ -1,21 +1,19 @@
 package model.moves;
 
 import model.Player;
+import model.Round;
 import model.data.Branch;
 import model.Professional;
-import model.data.NonVolatile;
 import model.data.Stat;
 import model.effects.*;
-import ui.UiManager;
 
 import static model.data.Branch.*;
 import static model.data.NonVolatile.*;
 import static model.data.Stat.*;
 import static model.data.Volatile.*;
-import static ui.Main.*;
 
 //Moves that cause damage on target, can have added effects, can be physical or special
-public enum DamagingMove implements Move {
+public enum Damaging implements Move {
     //DAMAGE ONLY
     DOMINATE("Dominate",SPORT,false,100, null,0,false),
     BATON_SMACK("Baton smack",SECURI,true,100, null,0,false),
@@ -119,7 +117,7 @@ public enum DamagingMove implements Move {
     private final int priority;
 
 
-    DamagingMove(String name, Branch branch, boolean physical, int power, Effect e, int priority, boolean charges) {
+    Damaging(String name, Branch branch, boolean physical, int power, Effect e, int priority, boolean charges) {
         this.name = name;
         this.branch = branch;
         this.physical = physical;
@@ -137,9 +135,9 @@ public enum DamagingMove implements Move {
     //            Calculate and apply damage to foe
     //            If move has an extra effect and move caused damage apply the effect
     @Override
-    public void use(boolean usedByPlayer1) {
-        Professional user = getUser(usedByPlayer1);
-        Professional foe = getUser(!usedByPlayer1);
+    public void use(Round round, boolean movedFirst) {
+        Professional user = round.getUser(movedFirst);
+        Professional foe = round.getUser(!movedFirst);
         if (charges && !user.getVolatileStatus().contains(CHARGE)) {
             user.addVolatileStatus(CHARGE);
         } else {
@@ -187,7 +185,7 @@ public enum DamagingMove implements Move {
 
     //EFFECT:Return name, branch, power, type, and effect description of all values in DamagingMoves
     public static String[][] toTable() {
-        DamagingMove[] values = DamagingMove.values();
+        Damaging[] values = Damaging.values();
         String[][] table = new String[values.length][6];
 
         for (int i = 0; i < values.length; i++) {
@@ -220,6 +218,7 @@ public enum DamagingMove implements Move {
         return power;
     }
 
+    @Override
     //EFFECT: Return "Physical" if physical, else "Special"
     public String getType() {
         return physical ? "Physical" : "Special";
@@ -244,4 +243,6 @@ public enum DamagingMove implements Move {
     public Branch getBranch() {
         return branch;
     }
+
+
 }

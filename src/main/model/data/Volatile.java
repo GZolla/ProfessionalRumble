@@ -4,9 +4,10 @@ package model.data;
 public enum Volatile implements Status {
     UNLCKY("unlucky",4),
     NAUSEA("nauseated",4),
-    CHARGE("charged",1),
     DRAIND("drained",1),
     FLINCH("flinched",1),
+    CHARGE("charged",1),
+    DUGIN("dug in",1),
     CRITIC("critical",0);
 
     private String name;

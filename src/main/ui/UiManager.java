@@ -58,6 +58,8 @@ public class UiManager {
 
 
 
+
+
     //EFFECTS: prints a table to command line
     public static void printTable(String[][] table, String[] headers) {
         int[] columnSizes = getColumnSizes(table, headers);
@@ -75,25 +77,6 @@ public class UiManager {
             System.out.println(getRowDisplay(columnSizes,table[i]));
         }
         System.out.println(hl);
-    }
-
-    //EFFECT: return value adding spaces for its length to match columnSize and add two spaces as left and right padding
-    public static String getValueDisplay(int columnSize, String value) {
-        String display = "  " + value; //Left padding and value
-        for (int i = 0; i < columnSize - value.length() + 2; i++) {
-            //Add " " to match size of column +right padding
-            display += " ";
-        }
-        return display;
-    }
-
-    //EFFECT: return entire row display, separating columns with | and displaying values as produced by getValueDisplay
-    public static String getRowDisplay(int[] columnSize, String[] row) {
-        String display = "|";
-        for (int i = 0; i < row.length; i++) {
-            display += getValueDisplay(columnSize[i],row[i]) + "|";
-        }
-        return display;
     }
 
     //EFFECT: get the largest string length for each column(including headers)
@@ -115,4 +98,25 @@ public class UiManager {
         }
         return columnSizes;
     }
+
+    //EFFECT: return value adding spaces for its length to match columnSize and add two spaces as left and right padding
+    public static String getValueDisplay(int columnSize, String value) {
+        String display = "  " + value; //Left padding and value
+        for (int i = 0; i < columnSize - value.length() + 2; i++) {
+            //Add " " to match size of column +right padding
+            display += " ";
+        }
+        return display;
+    }
+
+    //EFFECT: return entire row display, separating columns with | and displaying values as produced by getValueDisplay
+    public static String getRowDisplay(int[] columnSize, String[] row) {
+        String display = "|";
+        for (int i = 0; i < row.length; i++) {
+            display += getValueDisplay(columnSize[i],row[i]) + "|";
+        }
+        return display;
+    }
+
+
 }

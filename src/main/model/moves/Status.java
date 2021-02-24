@@ -1,21 +1,18 @@
 package model.moves;
 
-import model.Professional;
+import model.Round;
 import model.data.Branch;
 import model.effects.*;
 import model.effects.StatModifier;
-import ui.UiManager;
 
 import static model.data.Branch.*;
 import static model.data.NonVolatile.*;
 import static model.data.Volatile.*;
 import static model.data.Stat.*;
-import static ui.Main.PLAYER_1;
-import static ui.Main.PLAYER_2;
 
 
 //Moves that do not cause damage but have added effects
-public enum StatusMove implements Move {
+public enum Status implements Move {
     //STAT MODIFIER
     OPTIMIZATION("Optimization",NUMBER, new StatModifier(false,SPS,2,-1),0),
     ACCELERATE("Accelerate",TRANSP,new StatModifier(false, SPE,1,-1), 0),
@@ -38,7 +35,7 @@ public enum StatusMove implements Move {
     private int priority;
 
 
-    StatusMove(String name, Branch branch, Effect effect, int priority) {
+    Status(String name, Branch branch, Effect effect, int priority) {
         this.name = name;
         this.branch = branch;
         this.effect = effect;
@@ -47,7 +44,7 @@ public enum StatusMove implements Move {
 
     @Override
     //EFFECT: apply the added effect
-    public void use(boolean usedByPlayer1) {
+    public void use(Round round, boolean movedFirst) {
         effect.apply(usedByPlayer1);
     }
 
@@ -55,7 +52,7 @@ public enum StatusMove implements Move {
 
     //EFFECT: Return name, branch, and description of effect for all values
     public static String[][] toTable() {
-        StatusMove[] values = StatusMove.values();
+        Status[] values = Status.values();
         String[][] table = new String[values.length][4];
 
         for (int i = 0; i < values.length; i++) {
@@ -92,5 +89,10 @@ public enum StatusMove implements Move {
     @Override
     public int getPriority() {
         return priority;
+    }
+
+    @Override
+    public String getType() {
+        return "Status";
     }
 }

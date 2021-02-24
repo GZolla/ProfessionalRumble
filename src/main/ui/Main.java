@@ -2,15 +2,6 @@ package ui;
 
 import model.Player;
 import model.Professional;
-import model.data.NonVolatile;
-import model.moves.Move;
-
-import static model.data.ProfessionalBase.*;
-import static model.data.ProfessionalBase.QUARTERBACK;
-import static model.moves.DamagingMove.*;
-import static model.moves.DamagingMove.MOMENTUM_COLLISION;
-import static model.moves.StatusMove.*;
-import static model.moves.StatusMove.ACCELERATE;
 
 public class Main {
 
@@ -29,7 +20,7 @@ public class Main {
             } else if (choice == 1) {
                 TeamBuilder.main(null);
             } else {
-                Battle.main(null);
+                BattleManager.main(null);
             }
         }
 

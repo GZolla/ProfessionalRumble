@@ -1,7 +1,6 @@
 package model;
 
 import model.data.Volatile;
-import model.effects.*;
 import model.moves.Move;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,8 +12,8 @@ import static model.data.NonVolatile.*;
 import static model.data.ProfessionalBase.*;
 import static model.data.Stat.*;
 import static model.data.Volatile.*;
-import static model.moves.DamagingMove.*;
-import static model.moves.StatusMove.*;
+import static model.moves.Damaging.*;
+import static model.moves.Status.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static ui.Main.PLAYER_1;
 import static ui.Main.PLAYER_2;

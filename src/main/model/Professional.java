@@ -1,9 +1,8 @@
 package model;
 
 import model.data.*;
-import model.effects.Effect;
 import model.moves.*;
-import model.effects.Counter;
+import model.effects.CounterSetter;
 
 import java.util.ArrayList;
 
@@ -59,12 +58,12 @@ public class Professional {
         volatileTurns = new ArrayList<>();
         moveCounters = new int[4];
         for (int i = 0; i < 4; i++) {
-            moveCounters[i] = -1;
+            moveCounters[i] = 0;
         }
 
     }
 
-    //--- MOVES --------------------------------------------------------------------------------------------------------
+//--- MOVES ------------------------------------------------------------------------------------------------------------
 
     //EFFECT: returns true if not inflicted with any status that prevents moving
     public boolean canMove() {
@@ -103,13 +102,13 @@ public class Professional {
     //EFFECT: If professional can move and did not get hit with nausea:
     //              Uses the move of given index, changes lastMoveUsed to given index
     //        Updates and checks for status effects
-    public void useMove(int i) {
+    public void useMove(Round round, boolean movesFirst, int i) {
         if (gotNauseatedOnMove()) {
             System.out.println(getFullName() + " was hit with nausea.");
         } else if (canMove()) {
             System.out.println(getFullName() + " used " + moves[i].getName() + ".");
             lastMoveUsed = i;
-            moves[i].use(ledByPlayer1);
+            moves[i].use(round, movesFirst);
         }
 
         updateVolatileStatus();
@@ -120,7 +119,7 @@ public class Professional {
     //REQUIRES: Last move used is a damaging move and no stat changes to either this or foe occurred since
     //EFFECTS: Return the damage of the last move used
     public int getLastMoveDamage(Professional foe) {
-        return ((DamagingMove)moves[lastMoveUsed]).getDamage(this, foe);
+        return ((Damaging)moves[lastMoveUsed]).getDamage(this, foe);
     }
 
     //EFFECTS: sets move of given index to new move
@@ -151,7 +150,7 @@ public class Professional {
         return false;
     }
 
-    //--- STATS and STAGES ---------------------------------------------------------------------------------------------
+//--- STATS and STAGES -------------------------------------------------------------------------------------------------
 
     //MODIFIES: this
     //EFFECTS: set the stage of the corresponding stat to the given stage
@@ -221,7 +220,7 @@ public class Professional {
         return baseStat * Math.max(2.0, 2 + stage) / Math.max(2, 2 - stage);
     }
 
-    //--- STATUS -------------------------------------------------------------------------------------------------------
+//--- STATUS -----------------------------------------------------------------------------------------------------------
 
     //MODIFIES:this
     //EFFECTS: add a volatile status to this and add 0 to turns, prevent the addition of duplicates
@@ -302,7 +301,7 @@ public class Professional {
         return volatileTurns.get(volatileStatus.indexOf(status));
     }
 
-    //--- COUNTERS -----------------------------------------------------------------------------------------------------
+//--- COUNTERS ---------------------------------------------------------------------------------------------------------
 
     //MODIFIES: this
     //EFFECTS: add counter to counters
@@ -311,12 +310,14 @@ public class Professional {
     }
 
     //MODIFIES: this
-    //EFFECTS: Checks all counters, if any is zero it returns to zero
+    //EFFECTS: Checks all counters, if any is in its use window then reduce the counter by 1
     public void updateCounters() {
         for (int i = 0; i < 4; i++) {
 
-            if (moveCounters[i] > 0 && i != lastMoveUsed) {
-                Counter lastEffect = (Counter) moves[lastMoveUsed].getEffect();
+            if (moveCounters[i] > 0 && i != lastMoveUsed) {  //Move counter is set and move was not used this turn
+                //if move is not set then there is no need to reduce counter
+                //if used this turn, it means it was charged/applied so no reduction to window takes place
+                CounterSetter lastEffect = (CounterSetter) moves[lastMoveUsed].getEffect();
                 if (lastEffect.getWindowTurns() > moveCounters[i]) {
                     moveCounters[i] -= 1;
                 }

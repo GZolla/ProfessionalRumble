@@ -2,18 +2,18 @@ package model;
 
 import model.data.Stat;
 import model.data.Volatile;
-import model.moves.DamagingMove;
+import model.moves.Damaging;
 import model.moves.Move;
-import model.moves.StatusMove;
+import model.moves.Status;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static model.data.NonVolatile.*;
 import static model.data.ProfessionalBase.*;
 import static model.data.ProfessionalBase.QUARTERBACK;
-import static model.moves.DamagingMove.*;
-import static model.moves.StatusMove.*;
-import static model.moves.StatusMove.ACCELERATE;
+import static model.moves.Damaging.*;
+import static model.moves.Status.*;
+import static model.moves.Status.ACCELERATE;
 import static org.junit.jupiter.api.Assertions.*;
 import static ui.Main.PLAYER_1;
 import static ui.Main.PLAYER_2;
@@ -316,13 +316,13 @@ public class MovesTest {
 
     @Test
     public void testToTableAndGetHeadersLength(){
-        String[][] status = StatusMove.toTable();
-        String[][] damaging = DamagingMove.toTable();
-        String[] statusH = StatusMove.getHeaders();
-        String[] damagingH = DamagingMove.getHeaders();
+        String[][] status = Status.toTable();
+        String[][] damaging = Damaging.toTable();
+        String[] statusH = Status.getHeaders();
+        String[] damagingH = Damaging.getHeaders();
 
-        assertEquals(StatusMove.values().length,status.length);
-        assertEquals(DamagingMove.values().length,damaging.length);
+        assertEquals(Status.values().length,status.length);
+        assertEquals(Damaging.values().length,damaging.length);
 
         assertEquals(status[0].length,statusH.length);
         assertEquals(damaging[0].length,damagingH.length);
@@ -331,19 +331,19 @@ public class MovesTest {
 
     @Test
     public void testToTableOrder() {
-        String[][] status = StatusMove.toTable();
-        String[][] damaging = DamagingMove.toTable();
+        String[][] status = Status.toTable();
+        String[][] damaging = Damaging.toTable();
 
         assertEquals(5 + "",status[5][0]);
-        assertEquals(StatusMove.values()[2].getName(),status[2][1]);
-        assertEquals(StatusMove.values()[0].getBranch().name(),status[0][2]);
+        assertEquals(Status.values()[2].getName(),status[2][1]);
+        assertEquals(Status.values()[0].getBranch().name(),status[0][2]);
 
         assertEquals(15 + "",damaging[15][0]);
-        assertEquals(DamagingMove.values()[30].getName(),damaging[30][1]);
-        assertEquals(DamagingMove.values()[21].getBranch().name(),damaging[21][2]);
-        assertEquals(DamagingMove.values()[27].getPower() + "",damaging[27][3]);
-        assertEquals(DamagingMove.values()[18].getType(),damaging[18][4]);
-        assertEquals(DamagingMove.values()[3].getEffect().getDescription(),damaging[3][5]);
+        assertEquals(Damaging.values()[30].getName(),damaging[30][1]);
+        assertEquals(Damaging.values()[21].getBranch().name(),damaging[21][2]);
+        assertEquals(Damaging.values()[27].getPower() + "",damaging[27][3]);
+        assertEquals(Damaging.values()[18].getType(),damaging[18][4]);
+        assertEquals(Damaging.values()[3].getEffect().getDescription(),damaging[3][5]);
     }
 
 }

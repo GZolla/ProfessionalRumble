@@ -1,11 +1,12 @@
 package model.moves;
 
 import model.Professional;
+import model.Round;
 import model.data.Branch;
 import model.effects.Effect;
 
 public interface Move {
-    public void use(boolean usedByPlayer1);
+    public void use(Round round, boolean movedFirst);
 
     public String getName();
 
@@ -14,5 +15,8 @@ public interface Move {
     public Branch getBranch();
 
     public int getPriority();
+
+    public String getType();
+
 
 }

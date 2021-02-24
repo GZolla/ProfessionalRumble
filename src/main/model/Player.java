@@ -1,16 +1,15 @@
 package model;
 
 import model.data.NonVolatile;
-import model.data.Volatile;
 import model.moves.Move;
 
 import static model.data.ProfessionalBase.*;
 import static model.data.ProfessionalBase.QUARTERBACK;
 import static model.data.Volatile.CRITIC;
-import static model.moves.DamagingMove.*;
-import static model.moves.DamagingMove.MOMENTUM_COLLISION;
-import static model.moves.StatusMove.*;
-import static model.moves.StatusMove.ACCELERATE;
+import static model.moves.Damaging.*;
+import static model.moves.Damaging.MOMENTUM_COLLISION;
+import static model.moves.Status.*;
+import static model.moves.Status.ACCELERATE;
 
 //Class represents the players, handles team management and critical attacks
 public class Player {
