@@ -225,6 +225,6 @@ public class UserManager {
 
     //EFFECT: hashes given string to sha256
     private static String hash256(String input) {
-        return org.apache.commons.codec.digest.DigestUtils.sha256Hex(input);
+        return input;
     }
 }
