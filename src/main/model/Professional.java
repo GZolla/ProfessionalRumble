@@ -3,20 +3,24 @@ package model;
 import model.data.*;
 import model.moves.*;
 import model.effects.CounterSetter;
+import model.moves.Status;
+import persistence.Writable;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
 import static model.data.NonVolatile.*;
 import static model.data.Volatile.*;
-import static ui.Main.PLAYER_1;
-import static ui.Main.PLAYER_2;
 
 
 //A professional that is part of a team, based on a ProfessionalBase and must have a set of moves
-public class Professional {
+public class Professional implements Writable {
 
-    private boolean ledByPlayer1;
+    //Default properties before any battle,
+    private final Team team;
     private ProfessionalBase base;
+    private final Move[] moves;
 
 
     private int life;
@@ -30,24 +34,44 @@ public class Professional {
     private int speedStage;
 
     //Stores statuses and turns since inflicted
-    private ArrayList<Volatile> volatileStatus;
-    private ArrayList<Integer> volatileTurns;
+    private final ArrayList<Volatile> volatileStatus;
+    private final ArrayList<Integer> volatileTurns;
     private NonVolatile nonVolatileStatus;
     private int nonVolatileTurns;
 
-    private Move[] moves;
-    private int[] moveCounters; //current counters
 
+    private final int[] moveCounters; //current counters
 
-    private int lastMoveUsed; // used in added effects to calculate based on moves data
 
 
     //REQUIRES: moves must be 4 long
     //EFFECT: stages start at 0, status and counters as empty, moveCounters filled with -1
-    public Professional(boolean ledByPlayer1, ProfessionalBase base, Move[] moves) {
-        this.ledByPlayer1 = ledByPlayer1;
+    public Professional(Team team, ProfessionalBase base, Move[] moves) {
+        this.team = team;
         this.base = base;
         this.moves = moves;
+        this.life = base.getLife();
+        strengthStage = 0;
+        resistanceStage = 0;
+        specialStrengthStage = 0;
+        specialResistanceStage = 0;
+        speedStage = 0;
+        volatileStatus = new ArrayList<>();
+        volatileTurns = new ArrayList<>();
+        moveCounters = new int[4];
+        for (int i = 0; i < 4; i++) {
+            moveCounters[i] = 0;
+        }
+
+    }
+
+    //EFFECT: Constructs a professional from a JSONObject
+    public Professional(Team team, JSONObject json) {
+        this.team = team;
+        this.base = ProfessionalBase.values()[json.getInt("base")];
+        this.moves = movesFromJson(json.getJSONArray("moves"));
+
+
         this.life = base.getLife();
         strengthStage = 0;
         resistanceStage = 0;
@@ -69,17 +93,17 @@ public class Professional {
     public boolean canMove() {
         //VS prevents move
         boolean checkVS = false;
-        if (volatileStatus.contains(FLINCH)) {
+        if (hasVolatileStatus(FLINCH)) {
             System.out.println(getFullName() + " flinched.");
-        } else if (volatileStatus.contains(DRAIND)) {
-            System.out.println(getFullName() + " is drained from last move.");
+        } else if (hasVolatileStatus(DRAIND)) {
+            System.out.println(getFullName() + " is still drained from last move.");
         } else {
             checkVS = true;
         }
         //NVS prevents move
         boolean checkNVS = false;
         if (nonVolatileStatus == UNEMP) {
-            System.out.println(getFullName() + " is drained from last move.");
+            System.out.println(getFullName() + " is unemployed and cannot move.");
         } else if (nonVolatileStatus == DEMOR && nonVolatileTurns % 2 == 1) {
             System.out.println(getFullName() + " is too demoralised to act this turn.");
         } else {
@@ -89,55 +113,15 @@ public class Professional {
         return checkNVS && checkVS;
     }
 
+    //MODIFIES: this
     //EFFECT: returns true and takes damage if nauseated and turns since nauseated are odd
     public boolean gotNauseatedOnMove() {
         boolean gotNOM = volatileStatus.contains(NAUSEA) && getVolatileTurns(NAUSEA) % 2 == 1;
         if (gotNOM) {
-            takeDamage(Math.round(10 * base.getStrength() / base.getResistance()),1);
+            System.out.println(getFullName() + " was hit with nausea.");
+            takeDamage((10 * base.getStrength()) / base.getResistance(),1);
         }
         return gotNOM;
-    }
-
-
-    //EFFECT: If professional can move and did not get hit with nausea:
-    //              Uses the move of given index, changes lastMoveUsed to given index
-    //        Updates and checks for status effects
-    public void useMove(Round round, boolean movesFirst, int i) {
-        if (gotNauseatedOnMove()) {
-            System.out.println(getFullName() + " was hit with nausea.");
-        } else if (canMove()) {
-            System.out.println(getFullName() + " used " + moves[i].getName() + ".");
-            lastMoveUsed = i;
-            moves[i].use(round, movesFirst);
-        }
-
-        updateVolatileStatus();
-        checkNonVolatileStatus();
-        updateCounters();
-    }
-
-    //REQUIRES: Last move used is a damaging move and no stat changes to either this or foe occurred since
-    //EFFECTS: Return the damage of the last move used
-    public int getLastMoveDamage(Professional foe) {
-        return ((Damaging)moves[lastMoveUsed]).getDamage(this, foe);
-    }
-
-    //EFFECTS: sets move of given index to new move
-    public void setMove(int index, Move move) {
-        this.moves[index] = move;
-    }
-
-
-    public Move[] getMoves() {
-        return moves;
-    }
-
-    public String[] getMoveNames() {
-        String[] names = new String[moves.length];
-        for (int i = 0; i < moves.length; i++) {
-            names[i] = moves[i].getName();
-        }
-        return names;
     }
 
     //EFFECT: checks if this has been assigned given move
@@ -149,6 +133,25 @@ public class Professional {
         }
         return false;
     }
+
+    //EFFECT: If professional can move and did not get hit with nausea:
+    //              Uses the move of given index, changes lastMoveUsed to given index
+    public void useMove(Round round, boolean movesFirst, int i) {
+        if (!gotNauseatedOnMove() && canMove()) {
+            System.out.println(getFullName() + " used " + moves[i].getName() + ".");
+            moves[i].use(round, movesFirst);
+        }
+        updateCounters(i);
+    }
+
+    //MODIFIES: this
+    //EFFECT: Checks Statuses calling the method that handles each
+    public void checkEndTurn() {
+        updateVolatileStatus();
+        checkNonVolatileStatus();
+
+    }
+
 
 //--- STATS and STAGES -------------------------------------------------------------------------------------------------
 
@@ -201,19 +204,19 @@ public class Professional {
         double stage = getStage(stat, foeUsedCritical);
         switch (stat) {
             case STR:
-                baseStat = base.getStrength() / (nonVolatileStatus == INJUR ? 2 : 1);
+                baseStat = base.getStrength() / (nonVolatileStatus == INJUR ? 2.0 : 1.0);
                 break;
             case RES:
                 baseStat = base.getResistance();
                 break;
             case SPS:
-                baseStat = base.getSpecialStrengh() / (nonVolatileStatus == DEPRE ? 2 : 1);
+                baseStat = base.getSpecialStrentgh() / (nonVolatileStatus == DEPRE ? 2.0 : 1.0);
                 break;
             case SPR:
                 baseStat = base.getSpecialResistance();
                 break;
             default:
-                baseStat = base.getSpeed() / (nonVolatileStatus == DEMOR ? 2 : 1);
+                baseStat = base.getSpeed() / (nonVolatileStatus == DEMOR ? 2.0 : 1.0);
                 break;
         }
 
@@ -239,9 +242,12 @@ public class Professional {
         volatileStatus.remove(status);
     }
 
+    public boolean hasVolatileStatus(Volatile status) {
+        return volatileStatus.contains(status);
+    }
+
     //MODFIES: this
-    //EFFECTS: add one to every volatileTurn and remove all Statuses that reach its turn limit,
-    //         add crit point to leader if not unlucky
+    //EFFECTS: add one to every volatileTurn and remove all Statuses that reach its turn limit
     public void updateVolatileStatus() {
         for (int i = 0; i < volatileStatus.size(); i++) {
             int currentValue = volatileTurns.get(i);
@@ -257,13 +263,23 @@ public class Professional {
         }
     }
 
+
+    //MODIFIES: this
+    //EFFECT: changes nonVolatileStatus unless its fainted
+    public void setNonVolatileStatus(NonVolatile nonVolatileStatus) {
+        if (this.nonVolatileStatus != FAINT) {
+            this.nonVolatileStatus = nonVolatileStatus;
+            this.nonVolatileTurns = 0;
+        }
+    }
+
     //MODIFIES: this
     //EFFECT: checks for all the effects of non volatile status(described on class under package data)
     public void checkNonVolatileStatus() {
         if (nonVolatileStatus == SICK) {
-            takeDamage(Math.round(base.getLife() * nonVolatileTurns / 16),1);
+            takeDamage((base.getLife() * (nonVolatileTurns + 1)) / 16,1);
         } else if (nonVolatileStatus == INJUR || nonVolatileStatus == DEPRE) {
-            takeDamage(Math.round(base.getLife() / 16),1);
+            takeDamage(base.getLife() / 16,1);
         }
 
         if (nonVolatileStatus == UNEMP && nonVolatileTurns == 2) {
@@ -273,26 +289,6 @@ public class Professional {
             nonVolatileTurns += 1;
         }
 
-    }
-
-    //MODIFIES: this
-    //EFFECT: changes nonVolatileStatus unless its fainted
-    public void setNonVolatileStatus(NonVolatile nonVolatileStatus) {
-        if (nonVolatileStatus != FAINT) {
-            this.nonVolatileStatus = nonVolatileStatus;
-        }
-    }
-
-    public NonVolatile getNonVolatileStatus() {
-        return nonVolatileStatus;
-    }
-
-    public int getNonVolatileTurns() {
-        return nonVolatileTurns;
-    }
-
-    public ArrayList<Volatile> getVolatileStatus() {
-        return volatileStatus;
     }
 
     //REQUIRES: status is in volatileStatus
@@ -311,14 +307,14 @@ public class Professional {
 
     //MODIFIES: this
     //EFFECTS: Checks all counters, if any is in its use window then reduce the counter by 1
-    public void updateCounters() {
+    public void updateCounters(int usedMoveIndex) {
         for (int i = 0; i < 4; i++) {
 
-            if (moveCounters[i] > 0 && i != lastMoveUsed) {  //Move counter is set and move was not used this turn
+            if (moveCounters[i] > 0 && i != usedMoveIndex) {  //Move counter is set and move was not used this turn
                 //if move is not set then there is no need to reduce counter
                 //if used this turn, it means it was charged/applied so no reduction to window takes place
-                CounterSetter lastEffect = (CounterSetter) moves[lastMoveUsed].getEffect();
-                if (lastEffect.getWindowTurns() > moveCounters[i]) {
+                CounterSetter effect = (CounterSetter) moves[i].getEffect();
+                if (effect.getWindowTurns() >= moveCounters[i]) {
                     moveCounters[i] -= 1;
                 }
 
@@ -330,7 +326,9 @@ public class Professional {
     public int[] getMoveCounters() {
         return moveCounters;
     }
-    //--- OTHER --------------------------------------------------------------------------------------------------------
+
+
+//--- OTHER --------------------------------------------------------------------------------------------------------
 
     //MODIFIES: this
     //EFFECTS: foe's life is reduced by given value (negative values mean health recovery)
@@ -338,16 +336,12 @@ public class Professional {
         int realDmg = Math.min(life,Math.max(life - base.getLife(),amount));
         System.out.println(getFullName() + (realDmg > 0 ? " lost " : " gained ") + realDmg + " life points.");
         life -= realDmg;
-        switch ((int) (Math.floor(effectiveness * 10))) {
-            case 0:
-                System.out.println(getFullName() + " was unaffected.");
-                break;
-            case 5:
-                System.out.println("It was a weak move.");
-                break;
-            case 20:
-                System.out.println("It was super effective!");
-                break;
+        if (effectiveness == 0) {
+            System.out.println(getFullName() + " was not affected.");
+        } else if (effectiveness < 1) {
+            System.out.println("It was a weak move.");
+        } else if (effectiveness > 1) {
+            System.out.println("It was super effective!");
         }
 
         if (life == 0) {
@@ -377,16 +371,87 @@ public class Professional {
         return effectiveness;
     }
 
+    //EFFECTS: Removes all Volatile status, reset all move counters
+    public void tapOut(int replacement) {
+        volatileStatus.clear();
+        strengthStage = 0;
+        resistanceStage = 0;
+        specialStrengthStage = 0;
+        specialResistanceStage = 0;
+        speedStage = 0;
+
+        Professional newUser = team.getLeader().getTeamMembers()[replacement];
+        System.out.println(newUser.getFullName() + " tapped in.");
+        team.getLeader().setSelectedProfessional(replacement);
+    }
+
     //EFFECT: Get name with leader identifier.
     public String getFullName() {
-        return (ledByPlayer1 ? PLAYER_1 : PLAYER_2).getName() + "'s " + getName();
+        return team.getLeader().getName() + "'s " + getName();
     }
 
 
-    //--- ACCESSORS AND MUTATORS ---------------------------------------------------------------------------------------
 
-    public boolean isLedByPlayer1() {
-        return ledByPlayer1;
+    @Override
+    //EFFECT: returns this object as JSON string, including the index of its base and each move
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        json.put("base", base.getIndex());
+        json.put("moves", movesToJson());
+        return json;
+    }
+
+    //EFFECT: Returns the index of the moves in a JSONArray
+    private JSONArray movesToJson() {
+        JSONArray jsonArray = new JSONArray();
+
+        for (Move m : moves) {
+            JSONObject json = new JSONObject();
+            json.put("status?", m instanceof Status);
+            json.put("index", m.getIndex());
+            jsonArray.put(json);
+        }
+
+        return jsonArray;
+    }
+
+    public Move[] movesFromJson(JSONArray jsonArray) {
+        Move[] moves = new Move[4];
+        for (int i = 0; i < jsonArray.length(); i++) {
+            //Retrieve JSONObject from JSONArray
+            JSONObject jsonMove = (JSONObject) jsonArray.get(i);
+            //Build Professional
+            Move newMove;
+            if (jsonMove.getBoolean("status?")) {
+                newMove = model.moves.Status.values()[jsonMove.getInt("index")];
+            } else {
+                newMove = Damaging.values()[jsonMove.getInt("index")];
+            }
+            //Add Professional
+            moves[i] = newMove;
+        }
+
+        return moves;
+    }
+
+
+//--- ACCESSORS AND MUTATORS ---------------------------------------------------------------------------------------
+
+    //EFFECTS: retuns a String array with the names of all this professional's moves
+    public String[] getMoveNames() {
+        String[] names = new String[moves.length];
+        for (int i = 0; i < moves.length; i++) {
+            names[i] = moves[i].getName();
+        }
+        return names;
+    }
+
+    public NonVolatile getNonVolatileStatus() {
+        return nonVolatileStatus;
+    }
+
+    public Player getLeader() {
+        return team.getLeader();
     }
 
     public String getName() {
@@ -421,8 +486,23 @@ public class Professional {
         return base;
     }
 
-    public int getLastMoveUsed() {
-        return lastMoveUsed;
+
+
+    //EFFECT: Changes base to new base and life to the base's life
+    public void setBase(ProfessionalBase base) {
+        this.base = base;
+        this.life = base.getLife();
     }
+
+    //EFFECTS: sets move of given index to new move
+    public void setMove(int index, Move move) {
+        this.moves[index] = move;
+    }
+
+    public Move[] getMoves() {
+        return moves;
+    }
+
+
 
 }

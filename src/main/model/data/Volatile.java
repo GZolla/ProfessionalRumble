@@ -5,17 +5,23 @@ public enum Volatile implements Status {
     UNLCKY("unlucky",4),
     NAUSEA("nauseated",4),
     DRAIND("drained",1),
-    FLINCH("flinched",1),
     CHARGE("charged",1),
     DUGIN("dug in",1),
-    CRITIC("critical",0);
+    CRITIC("critical",0),
+    FLINCH("flinched",0),
+    PROTECTED("protected",0);
 
-    private String name;
-    private int turnLimit;
+    private final String name;
+    private final int turnLimit;
 
     Volatile(String name, int turnLimit) {
         this.name = name;
         this.turnLimit = turnLimit;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override
@@ -27,8 +33,4 @@ public enum Volatile implements Status {
         return turnLimit;
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
 }

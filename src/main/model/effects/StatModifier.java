@@ -1,10 +1,9 @@
 package model.effects;
 
 import model.Professional;
+import model.Round;
 import model.data.Stat;
 
-import static ui.Main.PLAYER_1;
-import static ui.Main.PLAYER_2;
 
 //Effect that changes the stages of target professional, or set a counter do apply the effect later
 public class StatModifier extends CounterSetter {
@@ -35,8 +34,10 @@ public class StatModifier extends CounterSetter {
     @Override
     //EFFECT: changes the stages of Stats in stats array,
     //        target PLAYER_1 if either usedByPlayer1 or targetFoe(but not both), otherwise target PLAYER_2
-    public void finalApply(boolean usedByPlayer1) {
-        Professional target = (targetFoe ^ usedByPlayer1 ? PLAYER_1 : PLAYER_2).getSelectedProfessional();
+    public void finalApply(Round round, boolean movedFirst) {
+        Professional target = round.getUser(targetFoe ^ movedFirst);
+
+        //Professional target = (targetFoe ^ usedByPlayer1 ? PLAYER_1 : PLAYER_2).getSelectedProfessional();
         for (Stat stat : stats) {
             int oldStage = target.getStage(stat,false);
             int newStage = Math.max(Math.min(oldStage + stages,6),-6);
@@ -69,7 +70,7 @@ public class StatModifier extends CounterSetter {
             String target = targetFoe ? "opponent" : "user";
             action = change + target;
         } else {
-            action =  "After " + chargeTurns + " uses, if used on next turn it reduces opponent";
+            action =  "If used immediately after charging for " + chargeTurns  + " uses, it reduces opponent";
         }
         return action + "'s " + statsMod + "by " + Math.abs(stages) + " stages";
 

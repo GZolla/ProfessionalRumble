@@ -1,65 +1,63 @@
 package model.data;
 
 
-import model.Professional;
-
-import static model.data.Branch.*;
+import ui.TableAble;
 
 //Base for all professionals, stores name, initial stats and branch for professionals
-public enum ProfessionalBase {
-    CEO("CEO",70,70,85,110,100,100,0,CORPOR),
-    QUARTERBACK("Quarterback",90,120,60,75,70,120,0,SPORT),
-    SINGER("Singer",65,75,70,115,95,115,0,ENTERT),
-    MINER("Miner",100,90,130,65,70,80,0,MANUAL),
-    PHYSICIST("Physicist",85,100,90,110,100,50,0,SCIENCE),
-    DOCTOR("Doctor",125,85,80,85,100,65,0,HEALTH),
-    PROFESSOR("Professor",100,60,70,110,110,85,0,EDUCAT),
-    PRESIDENT("President",80,100,100,100,100,60,0,GOVERN),
-    MATHEMATICIAN("Mathematician",120,50,70,100,125,70,0,NUMBER),
-    POET("Poet",90,50,80,125,85,110,0,LETTER),
-    TEXTILE_MAKER("Textile maker",100,100,80,80,80,95,0,DESIGN),
-    POLICEMAN("Policeman",80,120,110,65,60,105,0,SECURI),
-    LAWYER("Lawyer",70,100,65,100,120,95,1,CORPOR,LETTER),
-    COACH("Coach",115,110,100,70,70,70,1,EDUCAT,SPORT),
-    PHARMACIST("Pharmacist",120,70,80,95,85,85,1,HEALTH,SCIENCE),
-    CENTRAL_BANK_CHAIR("Central Bank chair",140,60,60,100,100,75,0,GOVERN,NUMBER),
-    INTERIOR_DECORATOR("Interior decorator",90,100,70,85,100,100,1,DESIGN,MANUAL),
-    JANITOR("Janitor",100,75,90,65,95,110,1,MANUAL),
-    ARMY_GENERAL("Army general",85,120,110,100,50,70,2,SECURI,GOVERN),
-    REALITY_COMPETITOR("Reality competitor",85,110,75,70,70,125,0,ENTERT,SPORT),
-    INDUSTRIAL_FARMER("Industrial farmer",100,100,100,85,75,75,1,FOOD,CORPOR),
-    CHICAGO_ECON("Chicago econ.",100,70,70,100,70,125,1,CORPOR,NUMBER),
-    DICTATOR("Dictator",100,80,110,80,95,70,3,GOVERN,SECURI),
-    COMEDIAN("Comedian",100,50,80,105,105,100,2,ENTERT,LETTER),
-    CHEMIST("Chemist",80,70,70,125,100,95,2,SCIENCE),
-    COMIC_BOOK_WRITER("Comic book writer",110,50,90,100,80,120,1,LETTER,DESIGN),
-    POKER_PLAYER("Poker player",70,85,90,115,95,85,2,SPORT,NUMBER),
-    CHIROPRACTOR("Chiropractor",110,110,100,50,90,80,1,HEALTH,MANUAL),
-    WEAPONS_DEVELOPER("Weapons developer",85,100,60,110,125,70,4,SECURI,SCIENCE),
-    MOCKUMENTARY_BOSS("Mockumentary Boss",85,120,70,110,70,85,3,ENTERT,CORPOR),
-    JUDGE("Judge",100,80,80,100,110,70,5,GOVERN,LETTER),
-    SELFDEFENSE_COACH("Self-defense Coach",90,80,125,60,80,115,1,EDUCAT,SECURI),
-    PERSONAL_TRAINER("Personal Trainer",90,125,80,60,80,115,2,SPORT,HEALTH),
-    ARCHITECT("Architect",80,95,70,110,90,90,0,DESIGN,NUMBER),
-    LIBERAL_ARTS_PROFESSOR("Liberal Arts Professor",100,60,80,120,80,95,3,EDUCAT,LETTER),
-    INVENTOR("Inventor",85,110,60,95,125,65,1,SCIENCE,DESIGN),
-    CHEF("Chef",100,110,85,100,70,70,6,FOOD),
-    TAXI_DRIVER("Taxi driver",90,130,100,50,45,120,2,TRANSP),
-    COMPUTER_SCIENTIST("Computer scientist",100,50,60,110,140,75,2,TECHNO),
-    ENVIRONMENTALIST("Environmentalist",85,95,50,130,80,95,4,ENVIRO);
+public enum ProfessionalBase implements TableAble {
+    CEO("CEO",70,70,85,110,100,100,Branch.CORPOR),
+    QUARTERBACK("Quarterback",90,120,60,75,70,120,Branch.SPORT),
+    SINGER("Singer",65,75,70,115,95,115,Branch.ENTERT),
+    MINER("Miner",100,90,130,65,70,80,Branch.MANUAL),
+    PHYSICIST("Physicist",85,100,90,110,100,50,Branch.SCIENCE),
+    DOCTOR("Doctor",125,85,80,85,100,65,Branch.HEALTH),
+    PROFESSOR("Professor",100,60,70,110,110,85,Branch.EDUCAT),
+    PRESIDENT("President",80,100,100,100,100,60,Branch.GOVERN),
+    MATHEMATICIAN("Mathematician",120,50,70,100,125,70,Branch.NUMBER),
+    POET("Poet",90,50,80,125,85,110,Branch.LETTER),
+    TEXTILE_MAKER("Textile maker",100,100,80,80,80,95,Branch.DESIGN),
+    POLICEMAN("Policeman",80,120,110,65,60,105,Branch.SECURI),
+    LAWYER("Lawyer",70,100,65,100,120,95,Branch.CORPOR,Branch.LETTER),
+    COACH("Coach",115,110,100,70,70,70,Branch.EDUCAT,Branch.SPORT),
+    PHARMACIST("Pharmacist",120,70,80,95,85,85,Branch.HEALTH,Branch.SCIENCE),
+    CENTRAL_BANK_CHAIR("Central Bank chair",140,60,60,100,100,75,Branch.GOVERN,Branch.NUMBER),
+    INTERIOR_DECORATOR("Interior decorator",90,100,70,85,100,100,Branch.DESIGN,Branch.MANUAL),
+    JANITOR("Janitor",100,75,90,65,95,110,Branch.MANUAL),
+    ARMY_GENERAL("Army general",85,120,110,100,50,70,Branch.SECURI,Branch.GOVERN),
+    REALITY_COMPETITOR("Reality competitor",85,110,75,70,70,125,Branch.ENTERT,Branch.SPORT),
+    INDUSTRIAL_FARMER("Industrial farmer",100,100,100,85,75,75,Branch.FOOD,Branch.CORPOR),
+    CHICAGO_ECON("Chicago econ.",100,70,70,100,70,125,Branch.CORPOR,Branch.NUMBER),
+    DICTATOR("Dictator",100,80,110,80,95,70,Branch.GOVERN,Branch.SECURI),
+    COMEDIAN("Comedian",100,50,80,105,105,100,Branch.ENTERT,Branch.LETTER),
+    CHEMIST("Chemist",80,70,70,125,100,95,Branch.SCIENCE),
+    COMIC_BOOK_WRITER("Comic book writer",110,50,90,100,80,120,Branch.LETTER,Branch.DESIGN),
+    POKER_PLAYER("Poker player",70,85,90,115,95,85,Branch.SPORT,Branch.NUMBER),
+    CHIROPRACTOR("Chiropractor",110,110,100,50,90,80,Branch.HEALTH,Branch.MANUAL),
+    WEAPONS_DEVELOPER("Weapons developer",85,100,60,110,125,70,Branch.SECURI,Branch.SCIENCE),
+    MOCKUMENTARY_BOSS("Mockumentary Boss",85,120,70,110,70,85,Branch.ENTERT,Branch.CORPOR),
+    JUDGE("Judge",100,80,80,100,110,70,Branch.GOVERN,Branch.LETTER),
+    SELFDEFENSE_COACH("Self-defense Coach",90,80,125,60,80,115,Branch.EDUCAT,Branch.SECURI),
+    PERSONAL_TRAINER("Personal Trainer",90,125,80,60,80,115,Branch.SPORT,Branch.HEALTH),
+    ARCHITECT("Architect",80,95,70,110,90,90,Branch.DESIGN,Branch.NUMBER),
+    LIBERAL_ARTS_PROFESSOR("Liberal Arts Professor",100,60,80,120,80,95,Branch.EDUCAT,Branch.LETTER),
+    INVENTOR("Inventor",85,110,60,95,125,65,Branch.SCIENCE,Branch.DESIGN),
+    CHEF("Chef",100,110,85,100,70,70,Branch.FOOD),
+    TAXI_DRIVER("Taxi driver",90,130,100,50,45,120,Branch.TRANSP),
+    COMPUTER_SCIENTIST("Computer scientist",100,50,60,110,140,75,Branch.TECHNO),
+    ENVIRONMENTALIST("Environmentalist",85,95,50,130,80,95,Branch.ENVIRO);
 
-    private String name;
-    private int life;
-    private int strength;
-    private int resistance;
-    private int specialStrengh;
-    private int specialResistance;
-    private int speed;
-    private int speedDistinct;
-    private Branch branch1;
-    private Branch branch2;
+    private final String name;
+    private final int life;
+    private final int strength;
+    private final int resistance;
+    private final int specialStrengh;
+    private final int specialResistance;
+    private final int speed;
+    private final Branch branch1;
+    private final Branch branch2;
 
-    ProfessionalBase(String name, int life, int str, int res, int sps, int spr, int spe, int spDis, Branch branch1) {
+    //EFFECTS: Creates ProfessionalBase with one branch
+    ProfessionalBase(String name, int life, int str, int res, int sps, int spr, int spe, Branch branch1) {
         this.name = name;
         this.life = life;
         this.strength = str;
@@ -67,13 +65,12 @@ public enum ProfessionalBase {
         this.specialStrengh = sps;
         this.specialResistance = spr;
         this.speed = spe;
-        this.speedDistinct = spDis;
         this.branch1 = branch1;
         branch2 = null;
     }
 
     //EFFECTS: Creates ProfessionalBase with two branches
-    ProfessionalBase(String n, int lif, int str, int res, int sps, int spr, int spe, int spDis, Branch b1, Branch b2) {
+    ProfessionalBase(String n, int lif, int str, int res, int sps, int spr, int spe, Branch b1, Branch b2) {
         this.name = n;
         this.life = lif;
         this.strength = str;
@@ -81,71 +78,14 @@ public enum ProfessionalBase {
         this.specialStrengh = sps;
         this.specialResistance = spr;
         this.speed = spe;
-        this.speedDistinct = spDis;
         this.branch1 = b1;
         this.branch2 = b2;
     }
 
-    //REQUIRES: index is inside range of existing base professionals
-    //EFFECT: Get base by given index
-    public static ProfessionalBase getByIndex(int index) {
-        return ProfessionalBase.values()[index];
-    }
-
-    //EFFECT: returns an array with the names of all existing professionals.
-    public static String[] getAllNames() {
-        ProfessionalBase[] professionals = ProfessionalBase.values();
-        String[] names = new String[professionals.length];
-
-        for (int i = 0; i < professionals.length; i++) {
-            names[i] = professionals[i].getName();
-        }
-
-        return names;
-    }
-
-    //EFFECT: returns a table with name, stats and branch of every professional
-    public static String[][] toTable() {
-        ProfessionalBase[] values = ProfessionalBase.values();
-        String[][] table = new String[values.length][9];
-
-        for (int i = 0; i < values.length; i++) {
-            table[i][0] = i + "";
-            table[i][1] = values[i].name;
-            table[i][2] = values[i].branch1.name();
-            if (values[i].branch2 != null) {
-                table[i][2] += " / " + values[i].branch2.name();
-            }
-            table[i][3] = values[i].life + "";
-            table[i][4] = values[i].strength + "";
-            table[i][5] = values[i].resistance + "";
-            table[i][6] = values[i].specialStrengh + "";
-            table[i][7] = values[i].specialResistance + "";
-            table[i][8] = values[i].speed + "";
-        }
-
-        return table;
-    }
-
-    //EFFECT: return header for table described in method above
-    public static String[] getHeaders() {
-        String[] headers = new String[9];
-        headers[0] = "ID";
-        headers[1] = "Name";
-        headers[2] = "Branch";
-        headers[3] = "Life";
-        headers[4] = "Strength";
-        headers[5] = "Resistance";
-        headers[6] = "Special Strength";
-        headers[7] = "Special Resistance";
-        headers[8] = "Speed";
-        return headers;
-    }
 
 
-    public String getName() {
-        return name;
-    }
+
+
 
     public int getStrength() {
         return strength;
@@ -159,7 +99,7 @@ public enum ProfessionalBase {
         return resistance;
     }
 
-    public int getSpecialStrengh() {
+    public int getSpecialStrentgh() {
         return specialStrengh;
     }
 
@@ -179,7 +119,52 @@ public enum ProfessionalBase {
         return branch2;
     }
 
-    public int getSpeedDistinct() {
-        return speedDistinct;
+
+//--- TABLE ABLE METHODS -----------------------------------------------------------------------------------------------
+    @Override
+    public int getIndex() {
+        return ordinal();
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    //EFFECTS: Return index, name, stats and branch in a String array
+    public String[] toRow() {
+        return new String[]{
+                getIndex() + "",
+                name,
+                branch1.getName() + (branch2 != null ? " / " + branch2.getName() : ""),
+                life + "",
+                strength + "",
+                resistance + "",
+                specialStrengh + "",
+                specialResistance + "",
+                speed + ""
+        };
+    }
+
+    @Override
+    //EFFECT: Return the headers for the table displaying values of Status
+    public String[] getHeaders() {
+        return new String[] {
+            "ID",
+            "Name",
+            "Branch",
+            "Life",
+            "Strength",
+            "Resistance",
+            "Special Strength",
+            "Special Resistance",
+            "Speed"
+        };
+    }
+
+    @Override
+    public TableAble[] getValues() {
+        return ProfessionalBase.values();
     }
 }

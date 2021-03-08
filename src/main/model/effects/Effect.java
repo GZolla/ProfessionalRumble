@@ -8,8 +8,6 @@ import model.Round;
 public interface Effect {
     public void apply(Round round, boolean movedFirst);
 
-    public String getDescription();
-
     default int getPriority() {
         return 0;
     }
@@ -17,4 +15,6 @@ public interface Effect {
     default boolean fails(Round round, boolean movedFirst) {
         return false;
     }
+
+    public String getDescription();
 }

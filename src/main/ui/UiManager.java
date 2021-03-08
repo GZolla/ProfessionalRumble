@@ -1,9 +1,18 @@
 package ui;
 
+import persistence.Writable;
+
 import java.util.Scanner;
 
 //A set of tools for command line ui
 public class UiManager {
+
+    //EFFECTS: Prints prompt and asks for nextLine
+    public static String prompt(String prompt) {
+        System.out.print(prompt);
+        Scanner sc = new Scanner(System.in);
+        return sc.nextLine();
+    }
 
     //EFFECTS: Displays options, returns answer of user(insists on valid input)
     public static int chooseOptions(String prompt,String[] options,boolean addReturn) {
@@ -33,6 +42,15 @@ public class UiManager {
         }
     }
 
+    //EFFECTS: Calls chooseOptions but based on a array of TableAble
+    public static int chooseOptions(String prompt,TableAble[] options,boolean addReturn) {
+        String[] stringArray = new String[options.length];
+        for (int i = 0; i < options.length; i++) {
+            stringArray[i] = options[i].getName();
+        }
+        return chooseOptions(prompt,stringArray,addReturn);
+    }
+
     //EFFECTS: Asks for an input in [0,limit] or -1 to signify cancel if set addCancel == true
     public static int largeOptions(String prompt, int limit,boolean addCancel) {
         if (addCancel) {
@@ -59,6 +77,12 @@ public class UiManager {
 
 
 
+
+
+    //EFFECTS: prints a table to command line based on a TableAble class(instance given, any instance works)
+    public static void printTable(TableAble data) {
+        printTable(data.toTable(),data.getHeaders());
+    }
 
     //EFFECTS: prints a table to command line
     public static void printTable(String[][] table, String[] headers) {
@@ -118,5 +142,12 @@ public class UiManager {
         return display;
     }
 
-
+    //EFFECT: From an array of Named, return their names
+    public static String[] getNames(Writable[] objects) {
+        String[] names = new String[objects.length];
+        for (int i = 0; i < objects.length; i++) {
+            names[i] = objects[i].getName();
+        }
+        return names;
+    }
 }

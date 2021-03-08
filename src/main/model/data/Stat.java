@@ -8,7 +8,7 @@ public enum Stat {
     SPR("special resistance"), // Divides base power of special attacks received
     SPE("speed"); //Used to calculate order of attacks
 
-    private String name;
+    private final String name;
 
     Stat(String name) {
         this.name = name;

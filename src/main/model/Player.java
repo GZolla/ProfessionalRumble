@@ -1,72 +1,120 @@
 package model;
 
+import model.exceptions.EssentialFileFailed;
 import model.data.NonVolatile;
-import model.moves.Move;
+import persistence.JsonReader;
+import persistence.JsonWriter;
+import persistence.SaveAble;
+import persistence.Writable;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import ui.UserManager;
 
-import static model.data.ProfessionalBase.*;
-import static model.data.ProfessionalBase.QUARTERBACK;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import static model.data.Volatile.CRITIC;
-import static model.moves.Damaging.*;
-import static model.moves.Damaging.MOMENTUM_COLLISION;
-import static model.moves.Status.*;
-import static model.moves.Status.ACCELERATE;
+import static model.data.Volatile.UNLCKY;
+import static model.effects.CriticalModifier.MAXCRITS;
+import static ui.UiManager.*;
 
 //Class represents the players, handles team management and critical attacks
-public class Player {
+public class Player implements Writable {
 
+
+    private final int id;
     private String name;
-    private int critPoints;
-    private Professional[] team;
+
+
+    private int criticalPoints;
+    private Team team;
     private int selectedProfessional;
 
 
-    //EFFECT: create new player, starts with the first professional of the team and no critical points
-    //        sets a default team each with their default move set.
-    public Player(String name, boolean isPLayer1) {
+    public Player(int id, String name) {
+        this.id = id;
         this.name = name;
-        critPoints = 0;
-        selectedProfessional = 0;
-        Move[] compSciMoves = new Move[]{CABLE_WHIP,COMPROMISE_NETWORK,KEYBOARD_SLAM,WORKOUT};
-        Move[] presiMoves = new Move[]{PRESI_PUNCH,ICBM_STRIKE,SURVEILL,OPTIMIZATION};
-        Move[] cbcMoves = new Move[]{REITERATIVE_PUNCH,ICBM_STRIKE,SURVEILL,OPTIMIZATION};
-        Move[] coachMoves = new Move[]{BACKPACK_SMACK,DISOBEDIENCE_SLAP, DOMINATE,REDCARD_FOUL};
-        Move[] dictMoves = new Move[]{ICBM_STRIKE,HYPEREXAMINE,LONG_AWAITED_NOVEL,CORPORAL_PUNISHMENT};
-        Move[] qbMoves = new Move[]{WORKOUT,ACCELERATE,FRIENDLY_MATCH,MOMENTUM_COLLISION};
 
-        Professional compSci = new Professional(isPLayer1, COMPUTER_SCIENTIST,compSciMoves);
-        Professional president = new Professional(isPLayer1, PRESIDENT,presiMoves);
-        Professional centralBankChair = new Professional(isPLayer1, CENTRAL_BANK_CHAIR,cbcMoves);
-        Professional selfDefenseCoach = new Professional(isPLayer1, SELFDEFENSE_COACH,coachMoves);
-        Professional dictator = new Professional(isPLayer1,DICTATOR,dictMoves);
-        Professional quarterback = new Professional(isPLayer1, QUARTERBACK,qbMoves);
-        team = new Professional[]{compSci,president,centralBankChair,selfDefenseCoach,dictator,quarterback};
     }
 
-    //--- BUILD TEAM ---------------------------------------------------------------------------------------------------
+    //EFFECTS: Construct player from stored data, if user does not exist name is "Guest"
+    public Player(JSONObject data) {
+        this.id = data.getInt("id");
+        this.team = new Team(this, data.getJSONObject("team"));
+        this.criticalPoints = 0;
+        this.selectedProfessional = -1;
 
-    public String[] getTeamNames() {
-        String[] names = new String[team.length];
-        for (int i = 0; i < team.length; i++) {
-            names[i] = team[i].getName();
+        String name = new UserManager().findName(this.id);
+        this.name = name == null ? "Guest" : name;
+    }
+
+    public SaveAble[] loadAll(String type) {
+        try {
+            JSONArray data = new JsonReader(type + "/" + id + ".json").arrayRead();
+            SaveAble[] items = new SaveAble[data.length()];
+            for (int i = 0; i < data.length(); i++) {
+                if (type == "battles") {
+                    items[i] = new Battle(i, data.getJSONObject(i));
+                } else {
+                    items[i] = new Team(this,data.getJSONObject(i));
+                }
+            }
+            return items;
+        } catch (IOException e) {
+            throw new EssentialFileFailed();
         }
-        return names;
     }
 
-    public void setTeam(Professional[] team) {
-        this.team = team;
+
+//--- BUILD TEAM ---------------------------------------------------------------------------------------------------
+
+    //EFFECTS: returns all the teams stored for this user
+    public SaveAble[] loadTeams() {
+        return loadAll("teams");
     }
 
-    public Professional[] getTeam() {
-        return team;
+    //EFFECTS: Prompts user to select teams
+    public int selectTeam() {
+
+        String[] names = getNames(loadTeams());
+        if (names.length == 0) {
+            System.out.println("No teams created.");
+            return 0;
+        }
+        return chooseOptions("Select a team:",names,true);
+    }
+
+    public void removeTeam(int index) {
+        SaveAble[] teams = loadTeams();
+        JSONArray jsonTeams = new JSONArray();
+        for (SaveAble t : teams) {
+            jsonTeams.put(t.toJson());
+        }
+        jsonTeams.remove(index);
+
+        JsonWriter writer = new JsonWriter("/teams/" + id + ".json");
+        try {
+            writer.open();
+            writer.writeArray(jsonTeams);
+            writer.close();
+        } catch (FileNotFoundException e) {
+            throw new EssentialFileFailed();
+        }
+
+    }
+
+    public Professional[] getTeamMembers() {
+        return team.getMembers();
     }
 
     public String[][] getTeamTable() {
-        String[][] table = new String[team.length][4];
-        for (int i = 0; i < team.length; i++) {
+        Professional[] members = team.getMembers();
+        String[][] table = new String[members.length][4];
+        for (int i = 0; i < members.length; i++) {
             table[i][0] = i + "";
-            table[i][1] = team[i].getName();
-            table[i][2] = team[i].getLife() + " / " + team[i].getBase().getLife();
-            NonVolatile status = team[i].getNonVolatileStatus();
+            table[i][1] = members[i].getName();
+            table[i][2] = members[i].getLife() + " / " + members[i].getBase().getLife();
+            NonVolatile status = members[i].getNonVolatileStatus();
             if (status == null) {
                 table[i][3] = "-";
             } else {
@@ -76,52 +124,153 @@ public class Player {
         return table;
     }
 
-    //--- CRITICAL POINTS ----------------------------------------------------------------------------------------------
+    @Override
+    public JSONObject toJson() {
+        JSONObject user = new JSONObject();
 
-    //REQUIRES: critPoints are in [-1,8] (-1 only before adding additional crit points at end of turn)
+        user.put("id",id);
+        if (team != null) {
+            user.put("team",team.toJson());
+        } else {
+            user.put("name",name);
+        }
+
+        return user;
+    }
+
+//--- BATTLE TOOLS -------------------------------------------------------------------------------------------------
+
+    //EFFECTS: returns all the battles stored for the user
+    public SaveAble[] loadBattles() {
+        return loadAll("battles");
+    }
+
+    //MODIFIES: this
+    //EFFECTS: Prompts the player to select a team, then sets battle properties,
+    //         if the player cancels team selection it returns false
+    public boolean readyUp() {
+        return setBattleProperties(selectTeam(),loadTeams());
+
+    }
+
+    //MODIFIES: this
+    //EFFECTS: Same effect as above but selecting from given players list of teams
+    public boolean readyUp(Player p) {
+        return setBattleProperties(p.selectTeam(),p.loadTeams());
+    }
+
+    //MODIFIES: this
+    //EFFECTS: checks selected is not = to teams length, (returning false if it is) and setting
+    //         this.team to team with index 'selected' in teams, and both criticalPoints and selectedProfessional to 0
+    public boolean setBattleProperties(int selected, SaveAble[] teams) {
+        if (selected == teams.length) {
+            return false;
+        }
+        team = new Team(this, teams[selected].toJson());//Ensure team is saved with this as leader
+        criticalPoints = 0;
+        selectedProfessional = 0;
+        return true;
+    }
+
+
+    //EFFECTS: Checks if it has selected a team to battle
+    public boolean isReady() {
+        return team != null;
+    }
+
+    //MODIFIES: this
+    //EFFECTS: makes team null
+    public void unready() {
+        team = null;
+    }
+
+//--- CRITICAL POINTS ----------------------------------------------------------------------------------------------
+
+    //!!!!!
+    //EFFECT: sets critPoints to given points, if outside [0,8] it corrects points to max/min accordingly
     public void setCritCounter(int critPoints) {
-        if (critPoints != this.critPoints) {
-            String change = critPoints > this.critPoints ? "increased" : "decreased";
+        critPoints = Math.max(0,Math.min(MAXCRITS,critPoints)); //Forces points into [0,8]
+        if (critPoints != this.criticalPoints) {
+            String change = critPoints > this.criticalPoints ? "increased" : "decreased";
             System.out.println(name + "'s critical points " + change + " to " + critPoints);
-            this.critPoints = critPoints;
+            this.criticalPoints = critPoints;
         }
 
     }
 
     //EFFECT: checks that the selected professional can move and crit points are full
     public boolean canUseCritical() {
-        return (critPoints == 8) && team[selectedProfessional].canMove();
+        return (criticalPoints == MAXCRITS) && team.getMembers()[selectedProfessional].canMove();
     }
 
     //EFFECTS: sets Professional usedCritical to true and empties critPoints
     public void useCritical() {
-        team[selectedProfessional].addVolatileStatus(CRITIC);
-        critPoints = 0;
+        team.getMembers()[selectedProfessional].addVolatileStatus(CRITIC);
+        criticalPoints = 0;
     }
 
-    //--- ACCESSORS AND MUTATORS ---------------------------------------------------------------------------------------
+    //EFFECTS: Runs when selected professional used damaging move, checks if selected professional is UNLUCKY,
+    //         and if not, adds one to critical point
+    public void raiseCriticals() {
+        Professional selected = team.getMembers()[selectedProfessional];
+        if (!selected.hasVolatileStatus(UNLCKY)) {
+            setCritCounter(criticalPoints + 1);
+        } else {
+            String prompt = selected.getName() + "'s unluckiness  prevented ";
+            System.out.println(prompt + name + " from gaining critical points.");
+        }
+    }
 
+//--- ACCESSORS AND MUTATORS ---------------------------------------------------------------------------------------
+
+
+    public int getId() {
+        return id;
+    }
+
+    //MODIFIES: this
+    //EFFECTS: Changes name to given name, changes the stored value as well.
     public void setName(String name) {
-        this.name = name;
+
+        try {
+            this.name = name;
+            JsonWriter writer = new JsonWriter("users.json");
+            JSONArray users = new JsonReader("users.json").arrayRead();
+            JSONObject user = users.getJSONObject(id);
+            user.put("name",name);
+
+            writer.open();
+            writer.writeArray(users);
+            writer.close();
+
+        } catch (IOException e) {
+            throw new EssentialFileFailed();
+        }
+
+    }
+
+
+    public String getName() {
+        return name;
+    }
+
+    public Professional getSelectedProfessional() {
+        return team.getMembers()[selectedProfessional];
+    }
+
+    public int getCritCounter() {
+        return criticalPoints;
+    }
+
+    public Team getTeam() {
+        return team;
     }
 
     public void setSelectedProfessional(int selectedProfessional) {
         this.selectedProfessional = selectedProfessional;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public int getSelectedIndex() {
+    public int getSelectedProfessionalIndex() {
         return selectedProfessional;
-    }
-
-    public Professional getSelectedProfessional() {
-        return team[selectedProfessional];
-    }
-
-    public int getCritCounter() {
-        return critPoints;
     }
 }

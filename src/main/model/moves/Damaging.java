@@ -1,11 +1,11 @@
 package model.moves;
 
-import model.Player;
 import model.Round;
 import model.data.Branch;
 import model.Professional;
 import model.data.Stat;
 import model.effects.*;
+import ui.TableAble;
 
 import static model.data.Branch.*;
 import static model.data.NonVolatile.*;
@@ -14,98 +14,120 @@ import static model.data.Volatile.*;
 
 //Moves that cause damage on target, can have added effects, can be physical or special
 public enum Damaging implements Move {
-    //DAMAGE ONLY
-    DOMINATE("Dominate",SPORT,false,100, null,0,false),
-    BATON_SMACK("Baton smack",SECURI,true,100, null,0,false),
-    KEYBOARD_SLAM("Keyboard slam",TECHNO,true,100, null,0,false),
+//null
+    DOMINATE("Dominate",SPORT,false,100,null),
+    BATON_SMACK("Baton smack",SECURI,true,100,null),
+    KEYBOARD_SLAM("Keyboard slam",TECHNO,true,100,null),
+//CriticalModifier
 
-    //STAT MODIFIERS (SELF) - Changes the stage of a stat
-    PRESI_PUNCH("Presidential punch",GOVERN,true,120, new StatModifier(false,new Stat[]{RES,SPR},-1,-1), 0, false),
-    MARBLE_SMASH("Marble smash",DESIGN,true,120, new StatModifier(false,new Stat[]{RES,SPR},-1,-1), 0, false),
-    BRICK_LAUNCH("Brick launch",MANUAL,false,90, new StatModifier(false,RES,-1,2), 0, false),
-    SPINACH_SMACK("Spinach smack",FOOD,true,40, new StatModifier(false,RES,1,1), 0, false),
-    DOOR_SLAM("Door slam",TRANSP,true,70, new StatModifier(false,RES,1,1), 0, false),
-    ICBM_STRIKE("ICBM strike",GOVERN,false,130, new StatModifier(false,SPS,-2,-1), 0, false),
-    CASHFLOW_BURNOUT("Cashflow burnout",CORPOR,false,130, new StatModifier(false,SPS,-2,0), 0, false),
-    FERTILIZER_FUME("Fertilizer fume",FOOD,false,70, new StatModifier(false,SPS,1,1), 0, false),
-    TAX_SPIKE("Tax spike",GOVERN,false,90, new StatModifier(false,SPS,1,2), 0, false),
-    DANCE_KICK("Dance kick",ENTERT,true,55, new StatModifier(false,SPE,1,-1), 0, false),
-    BACKPACK_SMACK("Backpack smack",EDUCAT,true,55, new StatModifier(false,SPE,1,-1), 0, false),
-    COREO_ASSAULT("Coreographed assault",ENTERT,true,120, new StatModifier(false,new Stat[]{STR,RES},-1,0), 0, false),
-    REITERATIVE_PUNCH("Reiterative punch",NUMBER,true,40, new StatModifier(false,STR,1,-1), 0, false),
+    CONTROVERSIAL_MARKETING("Controversial marketing",DESIGN,false,115,new CriticalModifier(-2)),
+    EXPERIMENTAL_THERAPY("Experimental therapy",HEALTH,true,115,new CriticalModifier(-2)),
+    STATISTICAL_STRIKE("Statistical strike",NUMBER,false,115,new CriticalModifier(-2)),
+    BIASED_REVISIONISM("Biased revisionism",LETTER,false,115,new CriticalModifier(-2)),
+    GMO_GUT_PUNCH("GMO gut punch",FOOD,true,115,new CriticalModifier(-2)),
+    CORPORAL_PUNISHMENT("Corporal punishment",EDUCAT,true,115,new CriticalModifier(-2)),
+    CERTIFICATE_SLASH("Certificate slash",EDUCAT,true,90,new CriticalModifier(2)),
+    FRIENDLY_MATCH("Friendly match",SPORT,false,40,new CriticalModifier(6)),
+    AWARENESS_CAMPAIGN("Awareness campaign",ENVIRO,false,40,new CriticalModifier(6)),
+    TEST_CRASH("Test crash",TRANSP,true,40,new CriticalModifier(6)),
 
-    //STAT MODIFIERS (FOE)
-    CUBIST_CRUSH("Cubist crush",DESIGN,true,70, new StatModifier(true,RES,-1,1), 0, false),
-    CABLE_WHIP("Cable whip",TECHNO,true,70, new StatModifier(true,RES,-1,1), 0, false),
-    DIVIDING_CHOP("Dividing chop",NUMBER,true,90, new StatModifier(true,RES,-1,2), 0, false),
-    KNIFE_SLICE("Knife slice",FOOD,true,90, new StatModifier(true,RES,-1,2), 0, false),
-    HARDCOVER_SLAM("Hardcover slam",LETTER,true,90, new StatModifier(true,RES,-1,2), 0, false),
-    TOOL_SLAM("Tool slam",MANUAL,true,90, new StatModifier(true,RES,-1,2), 0, false),
-    COMPROMISE_NETWORK("Compromise network",TECHNO,false,40, new StatModifier(true,SPR,-1,-1), 0, false),
-    LAWSUIT("Lawsuit",CORPOR,false,90, new StatModifier(true,SPR,-1,2), 0, false),
-    VENGEFUL_SONG("Vengeful song",ENTERT,false,90, new StatModifier(true,SPR,-1,2), 0, false),
-    DISOBEDIENCE_SLAP("Disobedience slap",EDUCAT,true,75, new StatModifier(true,SPE,-1,1), 0, false),
-    CEMENT_BLAST("Cement blast",MANUAL,false,75, new StatModifier(true,SPE,-1,1), 0, false),
-    PRECISE_PIERCE("Precise pierce",DESIGN,true,95, new StatModifier(true,SPE,-1,2), 0, false),
-    TRAFFIC_JAM("Traffic jam",TRANSP,false,95, new StatModifier(true,SPE,-1,2), 0, false),
-    PAPER_SLASH("Paper slash",LETTER,true,70, new StatModifier(true,STR,-1,1), 0, false),
-    TWISTER("Twister",ENVIRO,false,90, new StatModifier(true,STR,-1,2), 0, false),
 
-    //CRIT MODIFIERS (SELF) - Changes the critical points of target player
-    CONTROVERSIAL_MARKETING("Controversial marketing",DESIGN,false,115, new CritModifier(false,-2),0,false),
-    EXPERIMENTAL_THERAPY("Experimental therapy",HEALTH,true,115, new CritModifier(false,-2),0,false),
-    STATISTICAL_STRIKE("Statistical strike",NUMBER,false,115, new CritModifier(false,-2),0,false),
-    BIASED_REVISIONISM("Biased revisionism",LETTER,false,115, new CritModifier(false,-2),0,false),
-    FRIENDLY_MATCH("Friendly match",SPORT,false,40, new CritModifier(false,6),0,false),
-    CERTIFICATE_SLASH("Certificate slash",EDUCAT,true,90, new CritModifier(false,2),0,false),
-    GMO_GUT_PUNCH("GMO gut punch",FOOD,true,115, new CritModifier(false,-2),0,false),
-    AWARENESS_CAMPAIGN("Awareness campaign",ENVIRO,false,40, new CritModifier(false,6),0,false),
-    CORPORAL_PUNISHMENT("Corporal punishment",EDUCAT,true,115, new CritModifier(false,-2),0,false),
-    TEST_CRASH("Test crash",TRANSP,true,40, new CritModifier(false,6),0,false),
+//DefeatCondition
 
-    //CHARGING MOVES - Take a turn to charge, can be used in the next one
-    BREAKTHROUGH_BLAST("Breakthrough blast",SCIENCE,false,120, null,0,true),
-    LONG_AWAITED_NOVEL("Long awaited novel",LETTER,false,120, null,0,true),
-    UNDERGROUND_UPPERCUT("Underground uppercut",MANUAL,true,80, null,0,true),
-    PRIME_PUNCH("Prime punch",NUMBER,true,120, null,0,true),
+    UNDERCUT_UPPERCUT("Undercut uppercut",CORPOR,true,130,new DefeatCondition(false)),
+    MOMENTUM_COLLISION("Momentum collision",SCIENCE,true,130,new DefeatCondition(false)),
+    KIDNAP("Kidnap",TRANSP,false,130,new DefeatCondition(false)),
+    PREDATORY_PRICING("Predatory pricing",CORPOR,false,140,new DefeatCondition(true)),
+    HUMANE_EXECUTION("Humane execution",HEALTH,true,140,new DefeatCondition(true)),
+    PUNCHLINE("Punchline",ENTERT,false,140,new DefeatCondition(true)),
+    PSYCHOLOGICAL_TORTURE("Psychological torture",SECURI,false,140,new DefeatCondition(true)),
+    POISONED_BEVERAGE("Poisoned beverage",FOOD,false,140,new DefeatCondition(true)),
+//FailCondition
 
-    //DEFEAT CONDITIONS - Checks if the foe is defeated after dealing damage, either causes UNEMP or recoil if it fails
-    PREDATORY_PRICING("Predatory pricing",CORPOR,false,140, new DefeatCondition(true),0,false),
-    HUMANE_EXECUTION("Humane execution",HEALTH,true,140, new DefeatCondition(true),0,false),
-    UNDERCUT_UPPERCUT("Undercut uppercut",CORPOR,true,130, new DefeatCondition(false),0,false),
-    PUNCHLINE("Punchline",ENTERT,false,140, new DefeatCondition(true),0,false),
-    MOMENTUM_COLLISION("Momentum collision",SCIENCE,true,130, new DefeatCondition(false),0,false),
-    PSYCHOLOGICAL_TORTURE("Psychological torture",SECURI,false,140, new DefeatCondition(true),0,false),
-    KIDNAP("Kidnap",TRANSP,false,130, new DefeatCondition(false),0,false),
-    POISONED_BEVERAGE("Poisoned beverage",FOOD,false,140, new DefeatCondition(true),0,false),
+    BREAKTHROUGH_BLAST("Breakthrough blast",SCIENCE,false,120,new FailCondition(true,0)),
+    LONG_AWAITED_NOVEL("Long awaited novel",LETTER,false,120,new FailCondition(true,0)),
+    UNDERGROUND_UPPERCUT("Underground uppercut",MANUAL,true,80,new FailCondition(false,0)),
+    PRIME_PUNCH("Prime punch",NUMBER,true,120,new FailCondition(true,0)),
+    INSIDER_TRADING("Insider trading",CORPOR,false,70,new FailCondition(true,1)),
+    LANDMINE("Landmine",SECURI,false,150,new FailCondition(true,-3)),
+    HARVEST_HAVOC("Harvest havoc",FOOD,true,150,new FailCondition(false,-3)),
+//Priority
 
-    //STATUS INFLICTORS - Set a status (volatile or not) on the foe, unless given DRAIND which is inflicted on itself
-    TRASH_TALK("Trash talk",SPORT,false,80, new StatusInflictor(DEMOR,2),0,false),
-    REGULATORY_STRANGLE("Regulatory strangle",GOVERN,true,80, new StatusInflictor(DEMOR,2),0,false),
-    COURSE_FLUNK("Course flunk",EDUCAT,false,80, new StatusInflictor(DEPRE,2),0,false),
-    BACKSTAB("Backstab",CORPOR,true,80, new StatusInflictor(DEPRE,2),0,false),
-    REDCARD_FOUL("Red-card foul",SPORT,true,150, new StatusInflictor(DRAIND,-1),0,false),
-    DAM_FLOOD("Dam flood",ENVIRO,false,150, new StatusInflictor(DRAIND,-1),0,false),
-    STATIC_SLAP("Static slap",SCIENCE,true,50, new StatusInflictor(FLINCH,1),0,false),
-    REFLEX_HAMMER_TAP("Reflex hammer tap",HEALTH,true,50, new StatusInflictor(FLINCH,1),0,false),
-    BLACKOUT("Blackout",MANUAL,false,50, new StatusInflictor(FLINCH,1),0,false),
-    HEADLIGHTS_STUN("Headlights stun",TRANSP,false,50, new StatusInflictor(FLINCH,1),0,false),
-    STUNT_DOUBLE_SMACKDOWN("Stunt double smackdown",ENTERT,true,85, new StatusInflictor(FLINCH,2),0,false),
-    DISLOCATE("Dislocate",HEALTH,true,45, new StatusInflictor(INJUR,1),0,false),
-    TACKLE("Tackle",SPORT,true,80, new StatusInflictor(INJUR,2),0,false),
-    RIFLE_SHOT("Rifle shot",SECURI,false,80, new StatusInflictor(INJUR,2),0,false),
-    STAMPEDE("Stampede",ENVIRO,true,80, new StatusInflictor(INJUR,2),0,false),
-    VEHICLE_SMASH("Vehicle smash",TRANSP,true,80, new StatusInflictor(INJUR,2),0,false),
-    GRAVITY_SLAM("Gravity slam",SCIENCE,true,85, new StatusInflictor(NAUSEA,2),0,false),
-    SINUSOIDAL_BEAM("Sinusoidal beam",NUMBER,false,85, new StatusInflictor(NAUSEA,2),0,false),
-    COLOR_OVERLOAD("Color overload",DESIGN,false,85, new StatusInflictor(NAUSEA,2),0,false),
-    WRONG_MEDICINE("Wrong medicine",HEALTH,false,80, new StatusInflictor(SICK,2),0,false),
-    ACID_SPLASH("Acid splash",SCIENCE,false,80, new StatusInflictor(SICK,2),0,false),
-    MISGUIDED_NUTRITION("Misguided nutrition",FOOD,false,80, new StatusInflictor(SICK,2),0,false),
-    ARREST_RAID("Arrest raid",SECURI,true,45, new StatusInflictor(UNEMP,1),0,false),
-    RECKLESS_DRIVING("Reckless driving",TRANSP,true,45, new StatusInflictor(UNEMP,1),0,false),
-    SLANDER_PIECE("Slander piece",LETTER,false,80, new StatusInflictor(UNEMP,2),0,false),
-    MALWARE("Malware",TECHNO,false,80, new StatusInflictor(UNEMP,2),0,false);
+    SPONTANEOUS_REACTION("Spontaneous reaction",SCIENCE,false,40,new Priority(1)),
+    SURPRISE_EXAM("Surprise exam",EDUCAT,false,40,new Priority(1)),
+    AMATEUR_FIRST_AID("Amateur first-aid",HEALTH,true,40,new Priority(1)),
+    OFFICE_PRANK("Office prank",CORPOR,true,40,new Priority(1)),
+    PROTOTYPE_PUNCH("Prototype punch",DESIGN,true,40,new Priority(1)),
+    POP_UP_PUNCH("Pop-up Punch",TECHNO,true,40,new Priority(1)),
+    LIGHTSPE_KICK("LightSPE kick",SCIENCE,true,80,new Priority(2)),
+    SLAPSTICK_SMACK("Slapstick smack",ENTERT,true,40,new Priority(3)),
+
+//StatModifier
+
+    PRESIDENTIAL_PUNCH("Presidential punch",GOVERN,true,120,new StatModifier(false,new Stat[]{RES,SPR},-1,0)),
+    MARBLE_SMASH("Marble smash",DESIGN,true,120,new StatModifier(false,new Stat[]{RES,SPR},-1,0)),
+    BRICK_LAUNCH("Brick launch",MANUAL,false,90,new StatModifier(false,RES,-1,2)),
+    SPINACH_SMACK("Spinach smack",FOOD,true,40,new StatModifier(false,RES,1,0)),
+    DOOR_SLAM("Door slam",TRANSP,true,70,new StatModifier(false,RES,1,1)),
+    ICBM_STRIKE("ICBM strike",GOVERN,false,130,new StatModifier(false,SPS,-2,0)),
+    CASHFLOW_BURNOUT("Cashflow burnout",CORPOR,false,130,new StatModifier(false,SPS,-2,0)),
+    FERTILIZER_FUME("Fertilizer fume",FOOD,false,70,new StatModifier(false,SPS,1,1)),
+    TAX_SPIKE("Tax spike",GOVERN,false,90,new StatModifier(false,SPS,1,2)),
+
+    DANCE_KICK("Dance kick",ENTERT,true,55,new StatModifier(false,SPE,1,0)),
+    BACKPACK_SMACK("Backpack smack",EDUCAT,true,55,new StatModifier(false,SPE,1,0)),
+
+    COREOGRAPHED_ASSAULT("Coreographed assault",ENTERT,true,120,new StatModifier(false,new Stat[]{STR,RES},-1,0)),
+    REITERATIVE_PUNCH("Reiterative punch",NUMBER,true,40,new StatModifier(false,STR,1,0)),
+
+    CUBIST_CRUSH("Cubist crush",DESIGN,true,70,new StatModifier(true,RES,-1,1)),
+    CABLE_WHIP("Cable whip",TECHNO,true,70,new StatModifier(true,RES,-1,1)),
+    DIVIDING_CHOP("Dividing chop",NUMBER,true,90,new StatModifier(true,RES,-1,2)),
+    KNIFE_SLICE("Knife slice",FOOD,true,90,new StatModifier(true,RES,-1,2)),
+    HARDCOVER_SLAM("Hardcover slam",LETTER,true,90,new StatModifier(true,RES,-1,2)),
+    TOOL_SLAM("Tool slam",MANUAL,true,90,new StatModifier(true,RES,-1,2)),
+    COMPROMISE_NETWORK("Compromise network",TECHNO,false,40,new StatModifier(true,SPR,-1,0)),
+    LAWSUIT("Lawsuit",CORPOR,false,90,new StatModifier(true,SPR,-1,2)),
+    VENGEFUL_SONG("Vengeful song",ENTERT,false,90,new StatModifier(true,SPR,-1,2)),
+
+
+    DISOBEDIENCE_SLAP("Disobedience slap",EDUCAT,true,75,new StatModifier(true,SPE,-1,1)),
+    CEMENT_BLAST("Cement blast",MANUAL,false,75,new StatModifier(true,SPE,-1,1)),
+    PRECISE_PIERCE("Precise pierce",DESIGN,true,95,new StatModifier(true,SPE,-1,2)),
+    TRAFFIC_JAM("Traffic jam",TRANSP,false,95,new StatModifier(true,SPE,-1,2)),
+    PAPER_SLASH("Paper slash",LETTER,true,70,new StatModifier(true,STR,-1,1)),
+    TWISTER("Twister",ENVIRO,false,90,new StatModifier(true,STR,-1,2)),
+//StatusInflictor
+
+
+    TRASH_TALK("Trash talk",SPORT,false,80,new StatusInflictor(DEMOR,2)),
+    REGULATORY_STRANGLE("Regulatory strangle",GOVERN,true,80,new StatusInflictor(DEMOR,2)),
+
+    COURSE_FLUNK("Course flunk",EDUCAT,false,80,new StatusInflictor(DEPRE,2)),
+    BACKSTAB("Backstab",CORPOR,true,80,new StatusInflictor(DEPRE,2)),
+    RED_CARD_FOUL("Red-card foul",SPORT,true,150,new StatusInflictor(DRAIND,0)),
+    DAM_FLOOD("Dam flood",ENVIRO,false,150,new StatusInflictor(DRAIND,0)),
+    STATIC_SLAP("Static slap",SCIENCE,true,50,new StatusInflictor(FLINCH,1)),
+    REFLEX_HAMMER_TAP("Reflex hammer tap",HEALTH,true,50,new StatusInflictor(FLINCH,1)),
+    BLACKOUT("Blackout",MANUAL,false,50,new StatusInflictor(FLINCH,1)),
+    HEADLIGHTS_STUN("Headlights stun",TRANSP,false,50,new StatusInflictor(FLINCH,1)),
+    STUNT_DOUBLE_SMACKDOWN("Stunt double smackdown",ENTERT,true,85,new StatusInflictor(FLINCH,2)),
+    DISLOCATE("Dislocate",HEALTH,true,45,new StatusInflictor(INJUR,1)),
+    TACKLE("Tackle",SPORT,true,80,new StatusInflictor(INJUR,2)),
+    RIFLE_SHOT("Rifle shot",SECURI,false,80,new StatusInflictor(INJUR,2)),
+    STAMPEDE("Stampede",ENVIRO,true,80,new StatusInflictor(INJUR,2)),
+    VEHICLE_SMASH("Vehicle smash",TRANSP,true,80,new StatusInflictor(INJUR,2)),
+
+    GRAVITY_SLAM("Gravity slam",SCIENCE,true,85,new StatusInflictor(NAUSEA,2)),
+    SINUSOIDAL_BEAM("Sinusoidal beam",NUMBER,false,85,new StatusInflictor(NAUSEA,2)),
+    COLOR_OVERLOAD("Color overload",DESIGN,false,85,new StatusInflictor(NAUSEA,2)),
+    WRONG_MEDICINE("Wrong medicine",HEALTH,false,80,new StatusInflictor(SICK,2)),
+    ACID_SPLASH("Acid splash",SCIENCE,false,80,new StatusInflictor(SICK,2)),
+    MISGUIDED_NUTRITION("Misguided nutrition",FOOD,false,80,new StatusInflictor(SICK,2)),
+    ARREST_RAID("Arrest raid",SECURI,true,45,new StatusInflictor(UNEMP,1)),
+    RECKLESS_DRIVING("Reckless driving",TRANSP,true,45,new StatusInflictor(UNEMP,1)),
+    SLANDER_PIECE("Slander piece",LETTER,false,80,new StatusInflictor(UNEMP,2)),
+    MALWARE("Malware",TECHNO,false,80,new StatusInflictor(UNEMP,2));
     
     
     private final String name;
@@ -113,18 +135,14 @@ public enum Damaging implements Move {
     private final boolean physical;
     private final Effect effect;
     private final int power;
-    private final boolean charges;
-    private final int priority;
 
 
-    Damaging(String name, Branch branch, boolean physical, int power, Effect e, int priority, boolean charges) {
+    Damaging(String name, Branch branch, boolean physical, int power, Effect effect) {
         this.name = name;
         this.branch = branch;
         this.physical = physical;
         this.power = power;
-        this.effect = e;
-        this.charges = charges;
-        this.priority = priority;
+        this.effect = effect;
     }
 
 
@@ -138,39 +156,34 @@ public enum Damaging implements Move {
     public void use(Round round, boolean movedFirst) {
         Professional user = round.getUser(movedFirst);
         Professional foe = round.getUser(!movedFirst);
-        if (charges && !user.getVolatileStatus().contains(CHARGE)) {
-            user.addVolatileStatus(CHARGE);
-        } else {
+
+        if (user.canMove() && (effect == null || !effect.fails(round,movedFirst)) && !foeIsProtected(foe)) {
             int dmg = getDamage(user, foe);
-            foe.takeDamage(dmg, foe.checkEffectiveness(branch));
-            if (user.getVolatileStatus().contains(CRITIC)) {
-                System.out.println("It was a critical hit!");
+            if (dmg > 0) {
+                foe.takeDamage(dmg, foe.checkEffectiveness(branch));
+                if (user.hasVolatileStatus(CRITIC)) {
+                    System.out.println("It was a critical hit!");
+                }
+
+                if (effect != null && foe.getNonVolatileStatus() != FAINT) {
+                    effect.apply(round, movedFirst);
+                }
+                round.getPlayer(movedFirst).raiseCriticals();
             }
-            if (effect != null && dmg != 0 && foe.getNonVolatileStatus() != FAINT) {
-                effect.apply(usedByPlayer1);
-            }
-            Player leader = usedByPlayer1 ? PLAYER_1 : PLAYER_2;
 
 
-            if (!user.getVolatileStatus().contains(UNLCKY)) {
-                leader.setCritCounter(Math.min(leader.getCritCounter() + 1,8));
-            } else {
-                String prompt = user.getName() + "'s unluckiness  prevented ";
-                System.out.println(prompt + leader.getName() + " from gaining critical points.");
-            }
         }
-
     }
 
     //EFFECT: return the damage of a move depending on user and foe stats, effectiveness and the same branch multiplier
-    //        if the move is physical use user's strength and foe's resistance, otherwise use special stats
+    //        if the move is physical use user"s strength and foe"s resistance, otherwise use special stats
     //        multiply by branch efficiency
     //        if player has volatile status critical
     //              ignore negative stage changes(lower user attack/raise foe defense) and multiply by 1.5
     //        round down result to nearest integer
     public int getDamage(Professional user, Professional foe) {
 
-        boolean critical = user.getVolatileStatus().contains(CRITIC);
+        boolean critical = user.hasVolatileStatus(CRITIC);
         double userStrength = user.getRealStat(physical ? STR : SPS, false);
         double foeResistance = foe.getRealStat(physical ? RES : SPR, critical);
         double baseMultiplier = (critical ? 1.5 : 1) * power * userStrength / (4 * foeResistance);
@@ -181,52 +194,38 @@ public enum Damaging implements Move {
 
         return (int) Math.floor(baseMultiplier * sameBranchMultiplier * effectiveness);
 
+
     }
 
-    //EFFECT:Return name, branch, power, type, and effect description of all values in DamagingMoves
-    public static String[][] toTable() {
-        Damaging[] values = Damaging.values();
-        String[][] table = new String[values.length][6];
-
-        for (int i = 0; i < values.length; i++) {
-            table[i][0] = i + "";
-            table[i][1] = values[i].name;
-            table[i][2] = values[i].branch.name();
-            table[i][3] = values[i].power + "";
-            table[i][4] = values[i].getType();
-            Effect effect = values[i].effect;
-
-            if (values[i].charges) {
-                table[i][5] = "1 turn charge needed before use.";
-            } else if (effect == null) {
-                table[i][5] = "-";
-            } else {
-                table[i][5] = effect.getDescription();
-            }
-
+    //EFFECTS: checks if foe has volatile status DUGIN, it announces it and returns true, otherwise returns false
+    public boolean foeIsProtected(Professional foe) {
+        if (foe.hasVolatileStatus(DUGIN)) {
+            System.out.println(foe.getFullName() + " dug in and avoided the move.");
+        } else if (foe.hasVolatileStatus(PROTECTED)) {
+            System.out.println(foe.getFullName() + " protected itself.");
+        } else {
+            return false;
         }
 
-        return table;
+        return true;
     }
 
-    //EFFECT: Return the headers for the table described above
-    public static String[] getHeaders() {
-        return new String[]{"ID","Name","Branch","Power","Type","Added Effect"};
-    }
-
-    public int getPower() {
-        return power;
-    }
-
-    @Override
     //EFFECT: Return "Physical" if physical, else "Special"
     public String getType() {
         return physical ? "Physical" : "Special";
     }
 
     @Override
-    public int getPriority() {
-        return priority;
+    public Effect getEffect() {
+        return effect;
+    }
+
+
+
+//--- TABLE ABLE METHODS -----------------------------------------------------------------------------------------------
+    @Override
+    public int getIndex() {
+        return ordinal();
     }
 
     @Override
@@ -235,14 +234,27 @@ public enum Damaging implements Move {
     }
 
     @Override
-    public Effect getEffect() {
-        return effect;
+    //EFFECT:Return name, branch, power, type, and effect description in a String array
+    public String[] toRow() {
+        return new String[]{
+                getIndex() + "",
+                name,
+                branch.getName(),
+                power + "",
+                getType(),
+                effect == null ? "-" : effect.getDescription()
+        };
+    }
+
+
+    @Override
+    //EFFECT: Return the headers displaying all values of Damaging
+    public String[] getHeaders() {
+        return new String[]{"ID","Name","Branch","Power","Type","Added Effect"};
     }
 
     @Override
-    public Branch getBranch() {
-        return branch;
+    public TableAble[] getValues() {
+        return Damaging.values();
     }
-
-
 }

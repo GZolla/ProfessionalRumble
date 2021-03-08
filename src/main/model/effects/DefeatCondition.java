@@ -1,10 +1,10 @@
 package model.effects;
 
 import model.Professional;
+import model.Round;
 
 import static model.data.NonVolatile.FAINT;
 import static model.data.NonVolatile.UNEMP;
-import static ui.Main.getUser;
 
 
 //Effect that punishes the user if it fails to faint the foe, either by inflicting unemployment, or recoil damage
@@ -18,9 +18,9 @@ public class DefeatCondition implements Effect {
 
     @Override
     //EFFECT: if foe has not fainted either set UNEMP as non volatile status or take 2/3 the damage of the move used
-    public void apply(boolean usedByPlayer1) {
-        Professional user = getUser(usedByPlayer1);
-        Professional foe = getUser(!usedByPlayer1);
+    public void apply(Round round, boolean movedFirst) {
+        Professional user = round.getUser(movedFirst);
+        Professional foe = round.getUser(!movedFirst);
         if (foe.getNonVolatileStatus() != FAINT) {
             String pre = "After failing to defeat " + foe.getName() + " " + user.getName();
             if (causeUMP) {
@@ -28,14 +28,15 @@ public class DefeatCondition implements Effect {
                 user.setNonVolatileStatus(UNEMP);
             } else {
                 System.out.println(pre + " suffered recoil.");
-                user.takeDamage((int) Math.floor(2.0 * user.getLastMoveDamage(foe) / 3),1);
+                user.takeDamage((2 * round.getUsedMoveDamage(movedFirst)) / 3,1);
             }
         }
     }
 
     @Override
+    //EFFECTS: returns description of effect based on if it causes UNEMP
     public String getDescription() {
-        String action = causeUMP ? "becomes unemployed" : " takes 2/3 of the damage caused to foe as recoil";
+        String action = causeUMP ? "becomes unemployed" : "takes 2/3 of the damage caused to foe as recoil";
         return "If the foe is not defeated after this move, user " + action + ".";
     }
 }

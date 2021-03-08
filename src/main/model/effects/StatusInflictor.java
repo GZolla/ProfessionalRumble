@@ -1,6 +1,7 @@
 package model.effects;
 
 import model.Professional;
+import model.Round;
 import model.data.NonVolatile;
 import model.data.Status;
 import model.data.Volatile;
@@ -8,8 +9,6 @@ import model.data.Volatile;
 import static model.data.NonVolatile.UNEMP;
 import static model.data.Volatile.DRAIND;
 import static model.data.Volatile.NAUSEA;
-import static ui.Main.PLAYER_1;
-import static ui.Main.PLAYER_2;
 
 //Effect that inflicts a status to target professional,
 public class StatusInflictor extends CounterSetter {
@@ -26,8 +25,8 @@ public class StatusInflictor extends CounterSetter {
 
     @Override
     //EFFECT: inflict status, targets self only if status is DRAIND, else target foe
-    public void finalApply(boolean usedByPlayer1) {
-        Professional target = (usedByPlayer1 ^ (status == DRAIND) ? PLAYER_2 : PLAYER_1).getSelectedProfessional();
+    public void finalApply(Round round, boolean movedFirst) {
+        Professional target = round.getUser(movedFirst == (status == DRAIND));
         if (status.isVolatile()) {
             if (status == UNEMP || status == NAUSEA) {
                 System.out.println(target.getFullName() + " became " + status.getName() + ".");

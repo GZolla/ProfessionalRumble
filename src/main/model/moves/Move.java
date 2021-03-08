@@ -4,19 +4,22 @@ import model.Professional;
 import model.Round;
 import model.data.Branch;
 import model.effects.Effect;
+import ui.TableAble;
 
-public interface Move {
+public interface Move extends TableAble {
     public void use(Round round, boolean movedFirst);
-
-    public String getName();
 
     public Effect getEffect();
 
-    public Branch getBranch();
+    default int getPriority() {
+        Effect eff = getEffect();
+        if (eff == null) {
+            return 0;
+        } else {
+            return eff.getPriority();
+        }
+    }
 
-    public int getPriority();
-
-    public String getType();
 
 
 }
