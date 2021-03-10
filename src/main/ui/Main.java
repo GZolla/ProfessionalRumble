@@ -4,6 +4,11 @@ import model.Battle;
 import model.Player;
 import persistence.SaveAble;
 
+import javax.swing.*;
+import javax.swing.plaf.FontUIResource;
+import java.awt.*;
+import java.util.Enumeration;
+
 import static ui.UiManager.chooseOptions;
 import static ui.UiManager.getNames;
 
@@ -12,28 +17,21 @@ public class Main {
 
     //EFFECT
     public static void main(String[] args) {
+        UIManager.put("OptionPane.messageFont", new Font("Arial", Font.BOLD, 14));
+        UIManager.put("OptionPane.buttonFont", new Font("Arial", Font.PLAIN, 12));
         System.out.println("Welcome to Professional's Rumble!");
 
+        new MainMenu(new Player(0,"Test1"));
 
 
 
-        while (true) {
-            Player user = userManager.access();
-            if (user == null) {
-                int res = chooseOptions("Do you want to exit the program", new String[]{"Yes","No"},false);
-                if (res == 0) {
-                    break;
-                }
-            } else {
-                mainMenu(user);
-            }
-        }
 
 
     }
 
     //EFFECT: outputs user's name and the available actions for the user, returns true if exiting mainMenu
     public static void mainMenu(Player user) {
+
         while (true) {
             System.out.println("Welcome " + user.getName());
             String[] options = new String[]{"New Battle","Load Battle","Manage Account","Change Account","Exit"};
@@ -80,6 +78,21 @@ public class Main {
         user.unready();
     }
 
+    public static Player chooseOpponent() {
+        while (true) {
+            int selection = chooseOptions("Log in or play as guest.",new String[]{"Login","Play as guest"},true);
+
+            switch (selection) {
+                case 0:
+                    return new UserManager().login();
+                case 1:
+                    return new Player(-1,"Guest");
+                default:
+                    return null;
+            }
+        }
+    }
+
     public static void chooseBattle(Player user) {
         while (true) {
             SaveAble[] battles =  user.loadBattles();
@@ -99,18 +112,5 @@ public class Main {
         }
     }
 
-    public static Player chooseOpponent() {
-        while (true) {
-            int selection = chooseOptions("Log in or play as guest.",new String[]{"Login","Play as guest"},true);
 
-            switch (selection) {
-                case 0:
-                    return new UserManager().login();
-                case 1:
-                    return new Player(-1,"Guest");
-                default:
-                    return null;
-            }
-        }
-    }
 }
