@@ -4,7 +4,7 @@ import model.data.ProfessionalBase;
 import model.effects.CriticalModifier;
 import model.effects.StatusInflictor;
 import model.moves.Damaging;
-import model.moves.Status;
+import model.moves.NonDamaging;
 import org.junit.jupiter.api.Test;
 import ui.TableAble;
 
@@ -13,8 +13,8 @@ import static model.data.NonVolatile.*;
 import static model.data.ProfessionalBase.*;
 import static model.effects.CriticalModifier.MAXCRITS;
 import static model.moves.Damaging.*;
-import static model.moves.Status.HYPEREXAMINE;
-import static model.moves.Status.SHAME;
+import static model.moves.NonDamaging.HYPEREXAMINE;
+import static model.moves.NonDamaging.SHAME;
 import static org.junit.jupiter.api.Assertions.*;
 
 //Test the methods of TestAbleTest on the classes that implement it
@@ -160,7 +160,7 @@ public class TableAbleTest {
 
         //Moves
         testBothStatics(Damaging.values());
-        testBothStatics(Status.values());
+        testBothStatics(NonDamaging.values());
 
     }
 

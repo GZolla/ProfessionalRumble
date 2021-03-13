@@ -15,10 +15,12 @@ import static ui.UiManager.getNames;
 public class Main {
     private static final UserManager userManager = new UserManager();
 
-    //EFFECT
+    //EFFECTS: changes the default font sizes for OptionPane objects(including TextField)
     public static void main(String[] args) {
-        UIManager.put("OptionPane.messageFont", new Font("Arial", Font.BOLD, 14));
-        UIManager.put("OptionPane.buttonFont", new Font("Arial", Font.PLAIN, 12));
+        //CITATION:https://stackoverflow.com/questions/26913923/how-do-you-change-the-size-and-font-of-a-joptionpane
+        UIManager.put("OptionPane.messageFont", new Font("Arial", Font.BOLD, 64));
+        UIManager.put("OptionPane.buttonFont", new Font("Arial", Font.PLAIN, 50));
+        UIManager.put("TextField.font", new Font("Arial", Font.PLAIN, 50));
         System.out.println("Welcome to Professional's Rumble!");
 
         new MainMenu(new Player(0,"Test1"));
@@ -111,6 +113,7 @@ public class Main {
             }
         }
     }
+
 
 
 }

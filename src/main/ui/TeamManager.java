@@ -6,16 +6,16 @@ import model.Team;
 import model.data.ProfessionalBase;
 import model.moves.Damaging;
 import model.moves.Move;
-import model.moves.Status;
+import model.moves.NonDamaging;
 import persistence.SaveAble;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
-import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.LinkedList;
 
-import static java.awt.GridBagConstraints.*;
 import static javax.swing.JOptionPane.showInputDialog;
+import static ui.CustomBagConstraints.customConstraint;
 import static ui.UiManager.*;
 import static ui.UiManager.largeOptions;
 
@@ -23,8 +23,21 @@ public class TeamManager extends BaseFrame {
 
     private final Player player;
     private Team team;
+    private int teamIndex;
+
     private Menu teamMenu;
 
+    private JLabel teamName;
+    private Menu membersMenu;
+
+    private JPanel memberEditor;
+    private JLabel profIcon;
+    private JComboBox<ProfessionalBase> memberBase;
+    private JComboBox<String>[] moves;
+
+
+    //EFFECTS: Creates JFrame with title "Team Builder", sets layout to GridBagLayout and displays the player's name,
+    //         the list of all teams created by the player, a button to add a new team and empty team editor
     public TeamManager(Player player) {
         super("Team Builder", Color.WHITE);
         setLayout(new GridBagLayout());
@@ -33,108 +46,166 @@ public class TeamManager extends BaseFrame {
 
         JLabel title = new JLabel(player.getName() + " | Team Builder");
         title.setFont(new Font("sans serif",Font.BOLD,128));
-        add(title,DefaultBagConstraints.HEADER_BANNER.getConstraint());
+        add(title, CustomBagConstraints.HEADER_BANNER.getConstraint());
 
-        setTeamMenu();
-        displayTeamEditor(null);
+        buildTeamMenu();
+        buildTeamEditor();
 
     }
 
-
-
-    public void setTeamMenu() {
-        SaveAble[] teams = player.loadTeams();
-        JButton[] buttons = new JButton[teams.length + 1];
-
-        for (int i = 0; i < teams.length; i++) {
-            JButton newButton = new JButton(teams[i].getName());
-            newButton.addActionListener(e -> displayTeamEditor(team));
-            buttons[i] = newButton;
-        }
-        JButton addTeam = new JButton("+ Create a New Team");
-        addTeam.addActionListener(e -> createNewTeam());
-        buttons[teams.length] = addTeam;
-
-        Font buttonFont = new Font("sans serif", Font.BOLD,64);
-
+    private void buildTeamMenu() {
         if (teamMenu != null) {
             this.remove(teamMenu);
         }
-        teamMenu = new Menu(buttons,new Style(buttonFont,Color.BLACK,new Color(0,64,128)),0, true);
+        Font buttonFont = new Font("sans serif", Font.BOLD,64);
+        teamMenu = new Menu(new Style(buttonFont,Color.WHITE,new Color(0,64,128)),0, true);
 
-        GridBagConstraints menuConstraints = new GridBagConstraints();
-        menuConstraints.gridx = 0;
-        menuConstraints.gridy = 1;
-        menuConstraints.weighty = 1;
+        SaveAble[] teams = player.loadTeams();
+
+
+        for (int i = 0; i < teams.length; i++) {
+            final int index = i;
+            JButton newButton = new JButton(teams[i].getName());
+
+            newButton.addActionListener(e -> displayTeamEditor((Team) teams[index],index));
+            teamMenu.addButton(newButton,i);
+        }
+        JButton addTeam = new JButton("+ Create a New Team");
+        addTeam.addActionListener(e -> createNewTeam());
+        teamMenu.addButton(addTeam,teams.length);
+
+        GridBagConstraints menuConstraints = customConstraint(0,1,1,2);
         menuConstraints.anchor = GridBagConstraints.NORTHWEST;
+        menuConstraints.weighty = 1;
         add(teamMenu,menuConstraints);
-        this.revalidate();
-        this.repaint();
-    }
-
-
-
-    public void createNewTeam() {
-        String newName = showInputDialog("Insert new team name.");
-        if (newName != null) {
-            team = new Team(player,newName);
-            teamMenu.addButton(new JButton(team.getName()),player.loadTeams().length);
-            saveNewTeam();
-            this.revalidate();
-            this.repaint();
-        }
-
-    }
-
-    private void displayTeamEditor(Team team) {
-        JPanel container = new JPanel();
-
-        JLabel name = new JLabel(team != null ? team.getName() : "Select a team from the menu on the right");
-        if (team == null) {
-            container.add(name);
-        } else {
-            container.setLayout(new GridBagLayout());
-            Menu members = createMemberMenu(team);
-            container.add(name,new GridBagConstraints(0, 0,REMAINDER,1,1,0,NORTHEAST,BOTH,new Insets(0, 0, 0, 0), 0,0));
-        }
-
-        add(container,new GridBagConstraints(1, 1,REMAINDER,1,1,0,NORTHEAST,BOTH,new Insets(0, 0, 0, 0), 0,0));
         revalidate();
         repaint();
     }
 
-    private Menu createMemberMenu(Team team) {
-        Professional[] members = team.getMembers();
-        
+    private void buildTeamEditor() {
+        JPanel container = new JPanel(new GridBagLayout());
+
+        teamName = new JLabel("Select a team from the menu on the right");
+        teamName.setFont(new Font("sans serif",Font.ITALIC,64));
+        container.add(teamName,customConstraint(0,0,1.0,0));
+
+        add(container,customConstraint(1,1,1.0,0));
+
+
+        buildMemberMenu();
+        buildMemberEditor();
+
+        container.add(membersMenu,customConstraint(0,1,2,1));
+        GridBagConstraints constraints = customConstraint(0,2,2,1);
+        constraints.weighty = 1.0;
+        container.add(memberEditor,constraints);
+
+
     }
 
+    //EFFECTS: Creates a horizontal menu to select members of a team(buttons are initially empty)
+    private void buildMemberMenu() {
+        membersMenu = new Menu(null,0,false);
+        membersMenu.setVisible(false);
 
-    public void editTeam(int currentIndex) {
-        String[] options = new String[]{"Change Name","Edit Members","Remove","Duplicate","Save and Return"};
-        while (true) {
-            switch (chooseOptions("What to do with '" + team.getName() + "'?",options,false)) {
-                case 0:
-                    team.setName(UiManager.prompt("Insert new name: "));
-                    break;
-                case 1:
-                    chooseProfessional();
-                    break;
-                case 2:
-                    player.removeTeam(currentIndex);
-                    return;
-                case 3:
-                    duplicateTeam(currentIndex);
-                    return;
-                case 4:
-                    return;
-            }
-            team.save(currentIndex);
+        for (int i = 0; i < 6; i++) {
+            membersMenu.addButton(new JButton(),i);
         }
     }
 
-    public void saveNewTeam() {
-        int newIndex = player.loadTeams().length;
-        team.save(newIndex);
+    private void buildMemberEditor() {
+        memberEditor = new JPanel(new GridBagLayout());
+        memberEditor.setVisible(false);
+
+        profIcon = new JLabel();
+        memberEditor.add(profIcon,customConstraint(0,0,1,8));
+
+        //Display base of member
+        memberBase = new JComboBox<>(ProfessionalBase.values());
+        memberEditor.add(memberBase,customConstraint(0,1,1,4));
+
+        String[] moveList = Move.listAllMoves();
+        moves = new JComboBox[4];
+        for (int i = 0; i < 4; i++) {
+            moves[i] = new JComboBox<>(moveList);
+            moves[i].setFont(new Font("sans serif",));
+            memberEditor.add(moves[i],customConstraint(1,3 * i,1,3));
+        }
+
+    }
+
+    private void displayTeamEditor(Team team, int teamIndex) {
+        this.team = team;
+        this.teamIndex = teamIndex;
+
+
+        teamName.setText(team.getName());
+        displayMembers();
+
+        displayMemberEditor(team.getMembers()[0]);
+
+        revalidate();
+        repaint();
+    }
+
+    public void displayMembers() {
+
+        Professional[] members = team.getMembers();
+        LinkedList<JButton> buttons = membersMenu.getButtons();
+        Font buttonFont = new Font("sans serif", Font.BOLD,48);
+
+        for (int i = 0; i < members.length; i++) {
+            Professional p = members[i];
+            Style buttonStyle =  new Style(buttonFont,p.getBase().getBranch1().getColor());
+            JButton b = buttons.get(i);
+            b.setText(p.getName());
+            buttonStyle.applyToComponent(b);
+
+            final int index = i;
+            b.addActionListener(e -> displayMemberEditor(team.getMembers()[index]));
+        }
+
+        membersMenu.setVisible(true);
+    }
+
+    public void displayMemberEditor(Professional professional) {
+        //ProfIcon
+
+        memberBase.setSelectedIndex(professional.getBase().getIndex());
+        int damagingLength = Damaging.values().length;
+        Move[] profMoves = professional.getMoves();
+        for (int i = 0; i < 4; i++) {
+            int index = profMoves[i].getIndex() + (profMoves[i] instanceof NonDamaging ? damagingLength : 0);
+            try {
+                moves[i].setSelectedIndex(index);
+            } catch (IllegalArgumentException e) {
+                System.out.println(profMoves[i].getName());
+            }
+        }
+
+        memberEditor.setVisible(true);
+
+    }
+
+    public void createNewTeam() {
+        String newName = showInputDialog(null,"Insert new team name.","New Team",JOptionPane.PLAIN_MESSAGE);
+        if (newName != null) {
+            SaveAble[] teams = player.loadTeams();
+
+            Team newTeam = new Team(player,newName);
+            final int index = teams.length;
+            JButton newButton = new JButton(newName);
+
+            newButton.addActionListener(e -> displayTeamEditor((Team) teams[index],index));
+
+            teamMenu.addButton(newButton,index);
+            newTeam.save(index);
+
+            displayTeamEditor(newTeam,index);
+            revalidate();
+            repaint();
+        }
+
     }
 
     public void duplicateTeam(int currentIndex) {
@@ -143,36 +214,13 @@ public class TeamManager extends BaseFrame {
         System.out.println(player.loadTeams()[0].getName());
         String name = team.getName();
         team.setName("Copy of " + name);
-        saveNewTeam();
+        team.save(player.loadTeams().length);
         team.setName(name);
     }
 
-    public void chooseProfessional() {
-        Professional[] members = team.getMembers();
-        while (true) {
-            int profIndex = chooseOptions("What Professional do you wish to edit?",getNames(members),true);
-            if (profIndex == members.length) {
-                break;
-            } else {
-                editProfessional(members[profIndex]);
-            }
 
-        }
-    }
 
-    public void editProfessional(Professional professional) {
-        while (true) {
-            String prompt = "What to do with " + professional.getName() + "?";
-            int action = chooseOptions(prompt,new String[]{"Change base","Change moveset"},true);
-            if (action == 2) {
-                break;
-            } else if (action == 1) {
-                editMoveSet(professional);
-            } else {
-                chooseNewBase(professional);
-            }
-        }
-    }
+
 
     public void chooseNewBase(Professional professional) {
         ProfessionalBase[] values = ProfessionalBase.values();
@@ -204,13 +252,13 @@ public class TeamManager extends BaseFrame {
             if (type == -1) {
                 break;
             } else {
-                Move[] values = type == 0 ? Status.values() : Damaging.values();
+                Move[] values = type == 0 ? NonDamaging.values() : Damaging.values();
                 printTable(values[0]);
 
                 int newMoveInd = largeOptions("Select new move.",values.length,true);
 
                 if (newMoveInd != -1) {
-                    Move move = (type == 0 ? Status.values() : Damaging.values())[newMoveInd];
+                    Move move = (type == 0 ? NonDamaging.values() : Damaging.values())[newMoveInd];
                     if (professional.hasMove(move)) {
                         System.out.println("Move already assigned to Professional");
                     } else {

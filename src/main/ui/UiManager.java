@@ -142,7 +142,7 @@ public class UiManager {
         return display;
     }
 
-    //EFFECT: From an array of Named, return their names
+    //EFFECT: From an array of Writable, return their names
     public static String[] getNames(Writable[] objects) {
         String[] names = new String[objects.length];
         for (int i = 0; i < objects.length; i++) {
@@ -150,4 +150,5 @@ public class UiManager {
         }
         return names;
     }
+
 }

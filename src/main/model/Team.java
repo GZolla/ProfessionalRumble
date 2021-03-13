@@ -10,8 +10,8 @@ import static model.data.ProfessionalBase.*;
 import static model.data.ProfessionalBase.QUARTERBACK;
 import static model.moves.Damaging.*;
 import static model.moves.Damaging.MOMENTUM_COLLISION;
-import static model.moves.Status.*;
-import static model.moves.Status.ACCELERATE;
+import static model.moves.NonDamaging.*;
+import static model.moves.NonDamaging.ACCELERATE;
 
 public class Team implements SaveAble {
 

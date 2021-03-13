@@ -3,7 +3,7 @@ package model;
 import model.data.*;
 import model.moves.*;
 import model.effects.CounterSetter;
-import model.moves.Status;
+import model.moves.NonDamaging;
 import persistence.Writable;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -407,7 +407,7 @@ public class Professional implements Writable {
 
         for (Move m : moves) {
             JSONObject json = new JSONObject();
-            json.put("status?", m instanceof Status);
+            json.put("status?", m instanceof NonDamaging);
             json.put("index", m.getIndex());
             jsonArray.put(json);
         }
@@ -423,7 +423,7 @@ public class Professional implements Writable {
             //Build Professional
             Move newMove;
             if (jsonMove.getBoolean("status?")) {
-                newMove = model.moves.Status.values()[jsonMove.getInt("index")];
+                newMove = NonDamaging.values()[jsonMove.getInt("index")];
             } else {
                 newMove = Damaging.values()[jsonMove.getInt("index")];
             }

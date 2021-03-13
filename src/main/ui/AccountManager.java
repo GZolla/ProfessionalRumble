@@ -6,7 +6,7 @@ import model.Team;
 import model.data.ProfessionalBase;
 import model.moves.Damaging;
 import model.moves.Move;
-import model.moves.Status;
+import model.moves.NonDamaging;
 import persistence.SaveAble;
 
 import java.util.Scanner;
@@ -194,13 +194,13 @@ public class AccountManager {
             if (type == -1) {
                 break;
             } else {
-                Move[] values = type == 0 ? Status.values() : Damaging.values();
+                Move[] values = type == 0 ? NonDamaging.values() : Damaging.values();
                 printTable(values[0]);
 
                 int newMoveInd = largeOptions("Select new move.",values.length,true);
 
                 if (newMoveInd != -1) {
-                    Move move = (type == 0 ? Status.values() : Damaging.values())[newMoveInd];
+                    Move move = (type == 0 ? NonDamaging.values() : Damaging.values())[newMoveInd];
                     if (professional.hasMove(move)) {
                         System.out.println("Move already assigned to Professional");
                     } else {

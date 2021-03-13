@@ -3,7 +3,7 @@ package model.effects;
 import model.Professional;
 import model.Round;
 import model.moves.Move;
-import model.moves.Status;
+import model.moves.NonDamaging;
 
 
 import static model.data.Volatile.CHARGE;
@@ -46,7 +46,7 @@ public class FailCondition implements Effect {
 
         String message = "";
         Move foeMove = round.getUsedMove(!movedFirst);
-        boolean usedDamaging = foeMove != null && !(foeMove instanceof Status);
+        boolean usedDamaging = foeMove != null && !(foeMove instanceof NonDamaging);
         if (priority == 0) {
             if (!user.hasVolatileStatus(identifier ? CHARGE : DUGIN)) {
                 message = user.getFullName() + (identifier ? " charged its move." : " dug itself in.");

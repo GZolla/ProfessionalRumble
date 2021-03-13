@@ -41,30 +41,32 @@ public class MainMenu extends BaseFrame {
     }
 
     public Menu createMenu() {
-        JButton[] buttons = new JButton[4];
-
-
-        JButton startBattle = new JButton("NEW BATTLE");
-        buttons[0] = startBattle;
-
-        JButton loadBattle = new JButton("LOAD BATTLE");
-        loadBattle.setEnabled(false);
-        buttons[1] = loadBattle;
-
-        JButton editTeams = new JButton("EDIT TEAMS");
-        editTeams.addActionListener(e -> new TeamManager(user));
-        buttons[2] = editTeams;
-
-        JButton profile = new JButton("PROFILE");
-        buttons[3] = profile;
-
-
         Font buttonFont = new Font("sans serif", Font.BOLD,64);
         Border border = BorderFactory.createCompoundBorder(
                 BorderFactory.createEtchedBorder(new Color(80,80,80),new Color(120,120,120)),
                 Style.padding
         );
-        return new Menu(buttons,new Style(buttonFont, Color.WHITE,Color.BLACK,border),50,true);
+        Menu menu = new Menu(new Style(buttonFont, Color.WHITE,Color.BLACK,border),50,true);
+
+
+
+        JButton startBattle = new JButton("NEW BATTLE");
+        menu.addButton(startBattle,0);
+
+        JButton loadBattle = new JButton("LOAD BATTLE");
+        loadBattle.setEnabled(false);
+        menu.addButton(loadBattle,1);
+
+        JButton editTeams = new JButton("EDIT TEAMS");
+        editTeams.addActionListener(e -> new TeamManager(user));
+        menu.addButton(editTeams,2);
+
+        JButton profile = new JButton("PROFILE");
+        menu.addButton(profile,3);
+
+
+
+        return menu;
     }
 
     public static void startBattle(Player user) {

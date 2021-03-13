@@ -8,8 +8,8 @@ import static model.data.NonVolatile.*;
 import static model.data.ProfessionalBase.*;
 import static model.data.Volatile.*;
 import static model.moves.Damaging.*;
-import static model.moves.Status.HYPEREXAMINE;
-import static model.moves.Status.PROTECT;
+import static model.moves.NonDamaging.HYPEREXAMINE;
+import static model.moves.NonDamaging.PROTECT;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ProfessionalTest {

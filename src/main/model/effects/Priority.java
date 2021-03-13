@@ -8,7 +8,7 @@ import model.data.Volatile;
 import java.util.ArrayList;
 
 import static model.Round.parseIndex;
-import static model.moves.Status.PROTECT;
+import static model.moves.NonDamaging.PROTECT;
 
 public class Priority implements Effect {
     private int priority;

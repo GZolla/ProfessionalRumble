@@ -14,7 +14,7 @@ import static model.effects.CriticalModifier.MAXCRITS;
 
 
 //Moves that do not cause damage but have added effects
-public enum Status implements Move {
+public enum NonDamaging implements Move {
     //CriticalModifier
     HYPEREXAMINE("Hyper-examine",DESIGN,new CriticalModifier(MAXCRITS)),
     SHAME("Shame",ENVIRO,new CriticalModifier(-MAXCRITS)),
@@ -38,7 +38,7 @@ public enum Status implements Move {
     private Branch branch;
     private Effect effect;
 
-    Status(String name, Branch branch, Effect effect) {
+    NonDamaging(String name, Branch branch, Effect effect) {
         this.name = name;
         this.branch = branch;
         this.effect = effect;
@@ -86,7 +86,7 @@ public enum Status implements Move {
 
     @Override
     public TableAble[] getValues() {
-        return Status.values();
+        return NonDamaging.values();
     }
 
 
