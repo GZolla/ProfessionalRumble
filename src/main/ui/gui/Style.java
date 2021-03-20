@@ -1,4 +1,4 @@
-package ui;
+package ui.gui;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -6,7 +6,8 @@ import java.awt.*;
 
 public class Style {
 
-    public static final Border padding = BorderFactory.createEmptyBorder(10,50,10,50);
+    public static final Border PADDING = BorderFactory.createEmptyBorder(10,50,10,50);
+    public static final Border ETCHED = BorderFactory.createEtchedBorder();
 
     private Font font;
     private Color fontColor;
@@ -23,7 +24,7 @@ public class Style {
         this.font = font;
         this.fontColor = fontColor;
         this.bgColor = bgColor;
-        this.border = padding;
+        this.border = PADDING;
     }
 
 
@@ -37,7 +38,7 @@ public class Style {
         this.font = font;
         this.bgColor = bgColor;
         this.fontColor = relativeLuminance(bgColor) < Math.sqrt(1.05 * 0.5) ? Color.WHITE : Color.BLACK;
-        this.border = padding;
+        this.border = PADDING;
     }
 
 

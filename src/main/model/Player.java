@@ -44,7 +44,7 @@ public class Player implements Writable {
         this.criticalPoints = 0;
         this.selectedProfessional = -1;
 
-        String name = new UserManager().findName(this.id);
+        String name = UserManager.findName(this.id);
         this.name = name == null ? "Guest" : name;
     }
 
@@ -128,8 +128,8 @@ public class Player implements Writable {
     public JSONObject toJson() {
         JSONObject user = new JSONObject();
 
-        user.put("id",id);
         if (team != null) {
+            user.put("id",id);
             user.put("team",team.toJson());
         } else {
             user.put("name",name);
@@ -231,22 +231,8 @@ public class Player implements Writable {
     //MODIFIES: this
     //EFFECTS: Changes name to given name, changes the stored value as well.
     public void setName(String name) {
-
-        try {
-            this.name = name;
-            JsonWriter writer = new JsonWriter("users.json");
-            JSONArray users = new JsonReader("users.json").arrayRead();
-            JSONObject user = users.getJSONObject(id);
-            user.put("name",name);
-
-            writer.open();
-            writer.writeArray(users);
-            writer.close();
-
-        } catch (IOException e) {
-            throw new EssentialFileFailed();
-        }
-
+        this.name = name;
+        saveToUsers(null,null);
     }
 
 
@@ -272,5 +258,29 @@ public class Player implements Writable {
 
     public int getSelectedProfessionalIndex() {
         return selectedProfessional;
+    }
+
+    public void saveToUsers(String newPassword, String newSalt) {
+        try {
+            JSONArray users = new JsonReader("users.json").arrayRead();
+            JSONObject userData;
+            if (newPassword == null) {
+                userData =  users.getJSONObject(id);
+                userData.put("name",name);
+            } else {
+                userData = toJson();
+                userData.put("password",newPassword);
+                userData.put("salt",newSalt);
+            }
+            users.put(id,userData);
+
+            JsonWriter writer = new JsonWriter("users.json");
+            writer.open();
+            writer.writeArray(users);
+            writer.close();
+        } catch (IOException e) {
+            throw new EssentialFileFailed();
+        }
+
     }
 }

@@ -2,6 +2,9 @@ package ui;
 
 import model.Battle;
 import model.Player;
+import ui.gui.BaseFrame;
+import ui.gui.Menu;
+import ui.gui.Style;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -10,20 +13,21 @@ import java.awt.*;
 import static ui.UiManager.chooseOptions;
 
 public class MainMenu extends BaseFrame {
-    private Player user;
+    private JLabel welcome;
 
-    public MainMenu(Player user) {
-        super("Main Menu", Color.WHITE);
+
+    public MainMenu(Player player, BaseFrame prev) {
+        super("Main Menu", Color.WHITE, prev);
+        this.player = player;
         setLayout(new GridBagLayout());
-        this.user = user;
 
-        JLabel label = new JLabel("Welcome " + user.getName());
-        label.setFont(new Font("sans serif",Font.BOLD,128));
+        welcome = new JLabel("Welcome " + player.getName());
+        welcome.setFont(new Font("sans serif",Font.BOLD,128));
         GridBagConstraints labelConstraints = new GridBagConstraints();
         labelConstraints.gridx = 0;
         labelConstraints.gridy = 0;
         labelConstraints.weighty = 2;
-        add(label,labelConstraints);
+        add(welcome,labelConstraints);
 
 
 
@@ -40,13 +44,10 @@ public class MainMenu extends BaseFrame {
 
     }
 
-    public Menu createMenu() {
+    public ui.gui.Menu createMenu() {
         Font buttonFont = new Font("sans serif", Font.BOLD,64);
-        Border border = BorderFactory.createCompoundBorder(
-                BorderFactory.createEtchedBorder(new Color(80,80,80),new Color(120,120,120)),
-                Style.padding
-        );
-        Menu menu = new Menu(new Style(buttonFont, Color.WHITE,Color.BLACK,border),50,true);
+        Border border = BorderFactory.createCompoundBorder(Style.ETCHED,Style.PADDING);
+        ui.gui.Menu menu = new Menu(new Style(buttonFont, Color.WHITE,Color.BLACK,border),50,true);
 
 
 
@@ -58,10 +59,11 @@ public class MainMenu extends BaseFrame {
         menu.addButton(loadBattle,1);
 
         JButton editTeams = new JButton("EDIT TEAMS");
-        editTeams.addActionListener(e -> new TeamManager(user));
+        editTeams.addActionListener(e -> new TeamManager(this));
         menu.addButton(editTeams,2);
 
         JButton profile = new JButton("PROFILE");
+        profile.addActionListener(e -> new Profile(this));
         menu.addButton(profile,3);
 
 
@@ -73,7 +75,7 @@ public class MainMenu extends BaseFrame {
         Player player2 = chooseOpponent();
         if (player2 != null) {
             if (user.readyUp()) {
-                if (new UserManager().findName(player2.getId()) != null) {
+                if (UserManager.findName(player2.getId()) != null) {
                     player2.readyUp();
                 } else {
                     player2.readyUp(user);
@@ -96,12 +98,16 @@ public class MainMenu extends BaseFrame {
 
             switch (selection) {
                 case 0:
-                    return new UserManager().login();
+                    //return new UserManager().login();
                 case 1:
                     return new Player(-1,"Guest");
                 default:
                     return null;
             }
         }
+    }
+
+    public void updateWelcome() {
+        welcome.setText("Welcome " + player.getName());
     }
 }

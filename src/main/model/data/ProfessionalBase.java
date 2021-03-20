@@ -82,6 +82,16 @@ public enum ProfessionalBase implements TableAble {
         this.branch2 = b2;
     }
 
+    //EFFECTS: Returns all the names of all bases
+    public static String[] listAllBases() {
+        ProfessionalBase[] values = ProfessionalBase.values();
+        String[] res = new String[values.length];
+        for (int i = 0; i < values.length; i++) {
+            res[i] = values[i].name;
+        }
+
+        return res;
+    }
 
 
 

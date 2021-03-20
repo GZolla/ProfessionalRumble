@@ -1,23 +1,11 @@
-package ui;
+package ui.gui;
 
 import java.awt.*;
 
 import static java.awt.GridBagConstraints.*;
 
-public enum CustomBagConstraints {
-    HEADER_BANNER(new GridBagConstraints(
-            0, 0,REMAINDER,1,0,0,WEST,NONE,new Insets(0, 0, 0, 0), 0,0
-    ));
+public class CustomBagConstraints {
 
-    private GridBagConstraints constraint;
-
-    CustomBagConstraints(GridBagConstraints gridBagConstraints) {
-        this.constraint = gridBagConstraints;
-    }
-
-    public GridBagConstraints getConstraint() {
-        return constraint;
-    }
 
     //EFFECTS: returns a GridBagConstraints with default values except for given gridx and gridy
     public static GridBagConstraints customConstraint(int gridx, int gridy) {
@@ -40,6 +28,15 @@ public enum CustomBagConstraints {
         GridBagConstraints constraints = customConstraint(gridx,gridy);
         constraints.weightx = weightx;
         constraints.weighty = weighty;
+        return constraints;
+    }
+
+    //EFFECTS: returns a GridBagConstraints with default values except for given gridx, gridy and inset
+    public static GridBagConstraints customConstraint(int gridx, int gridy, Insets insets) {
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridx = gridx;
+        constraints.gridy = gridy;
+        constraints.insets = insets;
         return constraints;
     }
 }
