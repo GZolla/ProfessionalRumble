@@ -11,7 +11,7 @@ import java.util.Enumeration;
 
 
 public class Main {
-    public final static BattleManager BATTLEMGR = new BattleManager();
+    public static final  BattleManager BATTLEMGR = new BattleManager();
 
     //EFFECTS: changes the default font sizes for OptionPane objects(including TextField), opens program
     public static void main(String[] args) {
