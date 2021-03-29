@@ -5,7 +5,7 @@ import model.data.Branch;
 import model.Professional;
 import model.data.Stat;
 import model.effects.*;
-import ui.TableAble;
+import ui.Main;
 
 import static model.data.Branch.*;
 import static model.data.NonVolatile.*;
@@ -20,16 +20,16 @@ public enum Damaging implements Move {
     KEYBOARD_SLAM("Keyboard slam",TECHNO,true,100,null),
 //CriticalModifier
 
-    CONTROVERSIAL_MARKETING("Controversial marketing",DESIGN,false,115,new CriticalModifier(-2)),
-    EXPERIMENTAL_THERAPY("Experimental therapy",HEALTH,true,115,new CriticalModifier(-2)),
-    STATISTICAL_STRIKE("Statistical strike",NUMBER,false,115,new CriticalModifier(-2)),
-    BIASED_REVISIONISM("Biased revisionism",LETTER,false,115,new CriticalModifier(-2)),
-    GMO_GUT_PUNCH("GMO gut punch",FOOD,true,115,new CriticalModifier(-2)),
-    CORPORAL_PUNISHMENT("Corporal punishment",EDUCAT,true,115,new CriticalModifier(-2)),
-    CERTIFICATE_SLASH("Certificate slash",EDUCAT,true,90,new CriticalModifier(2)),
-    FRIENDLY_MATCH("Friendly match",SPORT,false,40,new CriticalModifier(6)),
-    AWARENESS_CAMPAIGN("Awareness campaign",ENVIRO,false,40,new CriticalModifier(6)),
-    TEST_CRASH("Test crash",TRANSP,true,40,new CriticalModifier(6)),
+    CONTROVERSIAL_MARKETING("Controversial marketing",DESIGN,false,115,new CriticalModifier(-8)),
+    EXPERIMENTAL_THERAPY("Experimental therapy",HEALTH,true,115,new CriticalModifier(-8)),
+    STATISTICAL_STRIKE("Statistical strike",NUMBER,false,115,new CriticalModifier(-8)),
+    BIASED_REVISIONISM("Biased revisionism",LETTER,false,115,new CriticalModifier(-8)),
+    GMO_GUT_PUNCH("GMO gut punch",FOOD,true,115,new CriticalModifier(-8)),
+    CORPORAL_PUNISHMENT("Corporal punishment",EDUCAT,true,115,new CriticalModifier(-8)),
+    CERTIFICATE_SLASH("Certificate slash",EDUCAT,true,90,new CriticalModifier(8)),
+    FRIENDLY_MATCH("Friendly match",SPORT,false,40,new CriticalModifier(24)),
+    AWARENESS_CAMPAIGN("Awareness campaign",ENVIRO,false,40,new CriticalModifier(24)),
+    TEST_CRASH("Test crash",TRANSP,true,40,new CriticalModifier(24)),
 
 
 //DefeatCondition
@@ -157,12 +157,12 @@ public enum Damaging implements Move {
         Professional user = round.getUser(movedFirst);
         Professional foe = round.getUser(!movedFirst);
 
-        if (user.canMove() && (effect == null || !effect.fails(round,movedFirst)) && !foeIsProtected(foe)) {
+        if ((effect == null || !effect.fails(round,movedFirst)) && !foeIsProtected(foe)) {
             int dmg = getDamage(user, foe);
             if (dmg > 0) {
                 foe.takeDamage(dmg, foe.checkEffectiveness(branch));
                 if (user.hasVolatileStatus(CRITIC)) {
-                    System.out.println("It was a critical hit!");
+                    Main.BATTLEMGR.log("It was a critical hit!");
                 }
 
                 if (effect != null && foe.getNonVolatileStatus() != FAINT) {
@@ -200,9 +200,9 @@ public enum Damaging implements Move {
     //EFFECTS: checks if foe has volatile status DUGIN, it announces it and returns true, otherwise returns false
     public boolean foeIsProtected(Professional foe) {
         if (foe.hasVolatileStatus(DUGIN)) {
-            System.out.println(foe.getFullName() + " dug in and avoided the move.");
+            Main.BATTLEMGR.log(foe.getFullName() + " dug in and avoided the move.");
         } else if (foe.hasVolatileStatus(PROTECTED)) {
-            System.out.println(foe.getFullName() + " protected itself.");
+            Main.BATTLEMGR.log(foe.getFullName() + " protected itself.");
         } else {
             return false;
         }
@@ -220,7 +220,10 @@ public enum Damaging implements Move {
         return effect;
     }
 
-
+    @Override
+    public String toString() {
+        return name;
+    }
 
 //--- TABLE ABLE METHODS -----------------------------------------------------------------------------------------------
     @Override
@@ -237,24 +240,11 @@ public enum Damaging implements Move {
     //EFFECT:Return name, branch, power, type, and effect description in a String array
     public String[] toRow() {
         return new String[]{
-                getIndex() + "",
                 name,
                 branch.getName(),
                 power + "",
                 getType(),
                 effect == null ? "-" : effect.getDescription()
         };
-    }
-
-
-    @Override
-    //EFFECT: Return the headers displaying all values of Damaging
-    public String[] getHeaders() {
-        return new String[]{"ID","Name","Branch","Power","Type","Added Effect"};
-    }
-
-    @Override
-    public TableAble[] getValues() {
-        return Damaging.values();
     }
 }

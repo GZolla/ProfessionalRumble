@@ -64,7 +64,7 @@ public enum Branch implements TableAble {
         return color;
     }
 
-    //--- TABLE ABLE METHODS -----------------------------------------------------------------------------------------------
+//--- TABLE ABLE METHODS -----------------------------------------------------------------------------------------------
     @Override
     public int getIndex() {
         return ordinal();
@@ -82,7 +82,8 @@ public enum Branch implements TableAble {
         String[] row = new String[branches.length + 1];
         row[0] = name();
         for (int i = 0; i < branches.length; i++) {
-            row[i + 1] = getEffectiveness(i) + "";
+            double eff = getEffectiveness(i);
+            row[i + 1] = (eff + "").substring(0,eff == 0.5 ? 3 : 1);
         }
         return row;
     }
@@ -92,10 +93,10 @@ public enum Branch implements TableAble {
     public String[] getHeaders() {
         Branch[] branches = Branch.values();
         String[] headers = new String[branches.length + 1];
-        headers[0] = "V Attacker \\ Defender >";
+        headers[0] = "Attacker \\ Defender";
 
         for (int i = 0; i < branches.length; i++) {
-            headers[i + 1] = branches[i].name();
+            headers[i + 1] = branches[i].name().substring(0,3);
         }
 
         return headers;

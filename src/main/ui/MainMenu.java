@@ -1,6 +1,5 @@
 package ui;
 
-import model.Battle;
 import model.Player;
 import ui.gui.BaseFrame;
 import ui.gui.Menu;
@@ -10,14 +9,13 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 
-import static ui.UiManager.chooseOptions;
 
 public class MainMenu extends BaseFrame {
-    private JLabel welcome;
+    private final JLabel welcome;
 
 
     public MainMenu(Player player, BaseFrame prev) {
-        super("Main Menu", Color.WHITE, prev);
+        super("Main Menu", prev);
         this.player = player;
         setLayout(new GridBagLayout());
 
@@ -44,67 +42,24 @@ public class MainMenu extends BaseFrame {
 
     }
 
+    //MODIFIES: this
+    //EFFECTS: Creates the main menu, allowing users to enter a battle, edit teams or edit profile
     public ui.gui.Menu createMenu() {
         Font buttonFont = new Font("sans serif", Font.BOLD,64);
         Border border = BorderFactory.createCompoundBorder(Style.ETCHED,Style.PADDING);
         ui.gui.Menu menu = new Menu(new Style(buttonFont, Color.WHITE,Color.BLACK,border),50,true);
 
+        menu.addButton("ENTER BATTLE",e -> new EnterBattle(player,this),0);
 
+        menu.addButton("EDIT TEAMS",e -> new TeamManager(this),1);
 
-        JButton startBattle = new JButton("NEW BATTLE");
-        menu.addButton(startBattle,0);
+        menu.addButton("PROFILE",e -> new Profile(this),2);
 
-        JButton loadBattle = new JButton("LOAD BATTLE");
-        loadBattle.setEnabled(false);
-        menu.addButton(loadBattle,1);
-
-        JButton editTeams = new JButton("EDIT TEAMS");
-        editTeams.addActionListener(e -> new TeamManager(this));
-        menu.addButton(editTeams,2);
-
-        JButton profile = new JButton("PROFILE");
-        profile.addActionListener(e -> new Profile(this));
-        menu.addButton(profile,3);
+        menu.addButton("PROFPEDIA",e -> new Pedia(this),3);
 
 
 
         return menu;
-    }
-
-    public static void startBattle(Player user) {
-        Player player2 = chooseOpponent();
-        if (player2 != null) {
-            if (user.readyUp()) {
-                if (UserManager.findName(player2.getId()) != null) {
-                    player2.readyUp();
-                } else {
-                    player2.readyUp(user);
-                }
-
-            }
-        }
-        if (player2 != null && user.isReady() && player2.isReady()) {
-            Battle battle = new Battle(user,player2);
-            new BattleManager(battle).resume();
-        }
-
-
-        user.unready();
-    }
-
-    public static Player chooseOpponent() {
-        while (true) {
-            int selection = chooseOptions("Log in or play as guest.",new String[]{"Login","Play as guest"},true);
-
-            switch (selection) {
-                case 0:
-                    //return new UserManager().login();
-                case 1:
-                    return new Player(-1,"Guest");
-                default:
-                    return null;
-            }
-        }
     }
 
     public void updateWelcome() {

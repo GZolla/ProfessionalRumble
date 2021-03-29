@@ -19,10 +19,10 @@ import java.io.File;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.LinkedList;
 
 import static javax.swing.JOptionPane.showMessageDialog;
 import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
+import static ui.UiManager.showMessage;
 import static ui.gui.CustomBagConstraints.customConstraint;
 import static ui.gui.CustomForm.Row;
 
@@ -37,19 +37,14 @@ public class UserManager extends BaseFrame {
 
     //EFFECTS: create display buttons and call buildAccessJPanel()
     public UserManager() {
-        super("Professional Rumble", Color.WHITE,null);
+        super("Professional Rumble",null);
         setLayout(new GridBagLayout());
 
-        displayButtons = new Menu(new Style(new Font("sans serif",Font.PLAIN,48),Color.WHITE),0,false);
+        displayButtons = new Menu(new Style(new Font("sans serif",Font.PLAIN,48),Color.WHITE,Style.PADDING),0,false);
         add(displayButtons,customConstraint(0,0));
 
-        JButton loginDisplay = new JButton("Access Account");
-        loginDisplay.addActionListener(e -> changeDisplay(true));
-        displayButtons.addButton(loginDisplay,0);
-
-        JButton signupDisplay = new JButton("Create New Account");
-        signupDisplay.addActionListener(e -> changeDisplay(false));
-        displayButtons.addButton(signupDisplay,1);
+        displayButtons.addButton("Access Account",e -> changeDisplay(true),0);
+        displayButtons.addButton("Create New Account",e -> changeDisplay(false),1);
 
         buildAccessJPanel();
 
@@ -98,13 +93,14 @@ public class UserManager extends BaseFrame {
     //EFFECTS: Checks if credentials match a stored user, if they do enter main menu, otherwise display error message
     public void login() {
         String name = form.getField(0).getText();
-        JSONObject userData = findUser(name);
+
         JTextField pass = form.getField(1);
-        if (userData != null && checkPassword(userData,pass)) {
-            new MainMenu(new Player(userData.getInt("id"),name),this);
+        int id = checkCredentials(name,pass);
+        if (id != -1) {
+            new MainMenu(new Player(id,name),this);
         } else {
             pass.setText("");
-            showMessageDialog(null,"Username or Password is incorrect","Login Failed",JOptionPane.PLAIN_MESSAGE);
+            showMessage(this,"Username or Password is incorrect","Login Failed");
         }
     }
 
@@ -124,7 +120,7 @@ public class UserManager extends BaseFrame {
                 }
             }
         } else {
-            showMessageDialog(null,"Username already taken","Sign Up Failed",JOptionPane.PLAIN_MESSAGE);
+            showMessage(this,"Username already taken","Sign Up Failed");
         }
     }
 
@@ -180,7 +176,7 @@ public class UserManager extends BaseFrame {
     public static String findName(int id) {
         try {
             JSONArray users = new JsonReader("users.json").arrayRead();
-            if (id < users.length()) {
+            if (id > -1 && id < users.length()) {
                 return users.getJSONObject(id).getString("name");
             }
             return null;
@@ -215,7 +211,7 @@ public class UserManager extends BaseFrame {
 
         if (password.length < 8) {
             String msg = "Password must be at least 8 characters long.";
-            showMessageDialog(null,msg,"Sign Up Failed",JOptionPane.PLAIN_MESSAGE);
+            showMessage(null,msg,"Sign Up Failed");
 
         } else {
 
@@ -230,19 +226,24 @@ public class UserManager extends BaseFrame {
 
             } else {
 
-                showMessageDialog(null,"Passwords did not match.","Sign Up Failed",JOptionPane.PLAIN_MESSAGE);
+                showMessage(null,"Passwords did not match.","Sign Up Failed");
 
             }
         }
         return null;
     }
 
-    public static boolean checkPassword(JSONObject userData,JTextField passwordField) {
+    //EFFECTS: if given name and passwordField's password match a user return the id of the user, otherwise return -1
+    public static int checkCredentials(String name, JTextField passwordField) {
+        JSONObject userData = findUser(name);
+        if (userData == null) {
+            return -1;
+        }
         char[] password = ((JPasswordField) passwordField).getPassword();
         String hash = hash256(password,userData.getString("salt"));
 
         passwordField.setText("");
-        return hash.equals(userData.getString("password"));
+        return hash.equals(userData.getString("password")) ? userData.getInt("id") : -1;
     }
 
     //EFFECT: hashes given string to sha256 adding given salt

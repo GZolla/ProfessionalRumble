@@ -9,6 +9,7 @@ public interface SaveAble extends Writable {
     default void save(int currentIndex, Player p, String type) {
         SaveAble[] playerStored = p.loadAll(type);
 
+
         JSONArray jsonItems = new JSONArray();
         for (SaveAble s : playerStored) {
             jsonItems.put(s.toJson());

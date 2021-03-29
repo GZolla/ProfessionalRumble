@@ -82,17 +82,6 @@ public enum ProfessionalBase implements TableAble {
         this.branch2 = b2;
     }
 
-    //EFFECTS: Returns all the names of all bases
-    public static String[] listAllBases() {
-        ProfessionalBase[] values = ProfessionalBase.values();
-        String[] res = new String[values.length];
-        for (int i = 0; i < values.length; i++) {
-            res[i] = values[i].name;
-        }
-
-        return res;
-    }
-
 
 
 
@@ -129,6 +118,10 @@ public enum ProfessionalBase implements TableAble {
         return branch2;
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
 
 //--- TABLE ABLE METHODS -----------------------------------------------------------------------------------------------
     @Override
@@ -145,9 +138,9 @@ public enum ProfessionalBase implements TableAble {
     //EFFECTS: Return index, name, stats and branch in a String array
     public String[] toRow() {
         return new String[]{
-                getIndex() + "",
                 name,
-                branch1.getName() + (branch2 != null ? " / " + branch2.getName() : ""),
+                branch1.getName(),
+                (branch2 != null ? branch2.getName() : ""),
                 life + "",
                 strength + "",
                 resistance + "",
@@ -161,9 +154,9 @@ public enum ProfessionalBase implements TableAble {
     //EFFECT: Return the headers for the table displaying values of Status
     public String[] getHeaders() {
         return new String[] {
-            "ID",
             "Name",
-            "Branch",
+            "Branches",
+            "",
             "Life",
             "Strength",
             "Resistance",

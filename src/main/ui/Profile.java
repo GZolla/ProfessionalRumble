@@ -2,14 +2,13 @@ package ui;
 
 import ui.gui.BaseFrame;
 import ui.gui.CustomForm;
-import ui.gui.Menu;
-import ui.gui.Style;
 
 import javax.swing.*;
 import java.awt.*;
 
 import static javax.swing.JOptionPane.showInputDialog;
 import static javax.swing.JOptionPane.showMessageDialog;
+import static ui.UiManager.showMessage;
 import static ui.UserManager.*;
 import static ui.gui.CustomBagConstraints.customConstraint;
 
@@ -24,7 +23,7 @@ public class Profile extends BaseFrame {
 
 
     public Profile(MainMenu prev) {
-        super("Profile", Color.WHITE,prev);
+        super("Profile",prev);
         setLayout(new GridBagLayout());
 
         name = buildHeaderAndReturn("Profile Manager");
@@ -64,7 +63,7 @@ public class Profile extends BaseFrame {
     public void saveNewName() {
         String newName = this.newName.getText();
         if (UserManager.findUser(newName) != null) {
-            showMessageDialog(null,"Name is already taken!");
+            showMessage(this,"Name is already taken!","Login Failed");
         } else {
             player.setName(newName);
             player.saveToUsers(null,null);
@@ -73,14 +72,14 @@ public class Profile extends BaseFrame {
     }
 
     private void saveNewPassword() {
-        if (checkPassword(findUser(player.getName()),passwordForm.getField(0))) {
+        if (checkCredentials(player.getName(),passwordForm.getField(0)) != -1) {
             String[] hash = getHashedPassword(passwordForm);
             if (hash != null) {
                 player.saveToUsers(hash[0],hash[1]);
-                showMessageDialog(null,"Password Changed","Success",JOptionPane.PLAIN_MESSAGE);
+                showMessage(this,"Password Changed","Success");
             }
         } else {
-            showMessageDialog(null,"Current Password is incorrect","Login Failed",JOptionPane.PLAIN_MESSAGE);
+            showMessage(this,"Current Password is incorrect","Login Failed");
         }
     }
 

@@ -9,6 +9,7 @@ public class Style {
     public static final Border PADDING = BorderFactory.createEmptyBorder(10,50,10,50);
     public static final Border ETCHED = BorderFactory.createEtchedBorder();
 
+
     private Font font;
     private Color fontColor;
     private Color bgColor;
@@ -20,6 +21,8 @@ public class Style {
         this.bgColor = bgColor;
         this.border = border;
     }
+
+
     public Style(Font font, Color fontColor, Color bgColor) {
         this.font = font;
         this.fontColor = fontColor;
@@ -34,11 +37,11 @@ public class Style {
     //             - if bgColor is lighter than fontColor:
     //                 - fontColor is l2, meaning that contrast is better if it is black(divisor is the smallest)
     //                 - otherwise, fontColor is l1, making contrast better if it is white(largest numerator)
-    public Style(Font font, Color bgColor) {
+    public Style(Font font, Color bgColor, Border border) {
         this.font = font;
         this.bgColor = bgColor;
         this.fontColor = relativeLuminance(bgColor) < Math.sqrt(1.05 * 0.5) ? Color.WHITE : Color.BLACK;
-        this.border = PADDING;
+        this.border = border;
     }
 
 
@@ -49,12 +52,15 @@ public class Style {
         c.setBorder(border);
     }
 
+    public static Style getButtonStyle(int size) {
+        return new Style(new Font("sans serif",Font.PLAIN,size),Color.WHITE,new Color(20,80,150),PADDING);
+    }
+
+
     //CITATION: https://www.w3.org/WAI/GL/wiki/Relative_luminance (for methods below)
 
-
-
     //EFFECTS: Calculates relative luminance of a colour as indicated in page above
-    public double relativeLuminance(Color color) {
+    private double relativeLuminance(Color color) {
         double red = calculateComponent(color.getRed());
         double green = calculateComponent(color.getGreen());
         double blue = calculateComponent(color.getBlue());
@@ -62,7 +68,7 @@ public class Style {
     }
 
     //EFFECTS: processes one of the components of a colour as described by the formula cited above
-    public double calculateComponent(int value) {
+    private double calculateComponent(int value) {
         double proportion = value / 255.0;
         if (proportion <= 0.03928) {
             return proportion / 12.92;

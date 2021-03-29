@@ -5,6 +5,7 @@ import model.Round;
 import model.data.NonVolatile;
 import model.data.Status;
 import model.data.Volatile;
+import ui.Main;
 
 import static model.data.NonVolatile.UNEMP;
 import static model.data.Volatile.DRAIND;
@@ -29,7 +30,7 @@ public class StatusInflictor extends CounterSetter {
         Professional target = round.getUser(movedFirst == (status == DRAIND));
         if (status.isVolatile()) {
             if (status == UNEMP || status == NAUSEA) {
-                System.out.println(target.getFullName() + " became " + status.getName() + ".");
+                Main.BATTLEMGR.log(target.getFullName() + " became " + status.getName() + ".");
             }
             target.addVolatileStatus((Volatile) status);
         } else {

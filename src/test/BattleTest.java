@@ -1,6 +1,7 @@
 import model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ui.Main;
 
 import static model.data.ProfessionalBase.COMPUTER_SCIENTIST;
 import static model.data.ProfessionalBase.DICTATOR;
@@ -12,17 +13,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class BattleTest {
     private Player player1;
     private Player player2;
-    private Team team1;
-    private Team team2;
     private Battle battle;
 
     @BeforeEach
     public void runBefore() {
         player1 = new Player(0,"Test1");
         player2 = new Player(-1,"Test2");
-        Team[] teamSetter = new Team[] {new Team(player1,"Team1"),new Team(player2,"Team2")};
-        player1.setBattleProperties(0,teamSetter);
-        player2.setBattleProperties(1,teamSetter);
+        player1.setBattleProperties(new Team(player1,"Team1"));
+        player2.setBattleProperties(new Team(player2,"Team2"));
 
     }
 
@@ -32,12 +30,11 @@ public class BattleTest {
     public void testLogRounds() {
         setBattle(4,3);
 
-        player2.setCritCounter(10);
         addRound(3,0);
         Professional dictator = player1.getSelectedProfessional();
         Professional coach = player2.getSelectedProfessional();
-        addRound(3,0);
-        addRound(0,-1);
+        addRound(3,0);//dictator uses protect, coach uses light speed kick
+        addRound(0,-1); //dictator uses pop-up punch
         addRound(0,3);
         addRound(0,3);
 
@@ -89,6 +86,7 @@ public class BattleTest {
         player1.setSelectedProfessional(p1Prof);
         player2.setSelectedProfessional(p2Prof);
         battle = new Battle(player1,player2);
+        Main.BATTLEMGR.setBattle(battle);
     }
 
     //EFFECTS: runs a single round selecting moves of the given indexes

@@ -7,6 +7,7 @@ import model.moves.NonDamaging;
 import persistence.Writable;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import ui.Main;
 
 import java.util.ArrayList;
 
@@ -94,18 +95,18 @@ public class Professional implements Writable {
         //VS prevents move
         boolean checkVS = false;
         if (hasVolatileStatus(FLINCH)) {
-            System.out.println(getFullName() + " flinched.");
+            Main.BATTLEMGR.log(getFullName() + " flinched.");
         } else if (hasVolatileStatus(DRAIND)) {
-            System.out.println(getFullName() + " is still drained from last move.");
+            Main.BATTLEMGR.log(getFullName() + " is still drained from last move.");
         } else {
             checkVS = true;
         }
         //NVS prevents move
         boolean checkNVS = false;
         if (nonVolatileStatus == UNEMP) {
-            System.out.println(getFullName() + " is unemployed and cannot move.");
+            Main.BATTLEMGR.log(getFullName() + " is unemployed and cannot move.");
         } else if (nonVolatileStatus == DEMOR && nonVolatileTurns % 2 == 1) {
-            System.out.println(getFullName() + " is too demoralised to act this turn.");
+            Main.BATTLEMGR.log(getFullName() + " is too demoralised to act this turn.");
         } else {
             checkNVS = true;
         }
@@ -118,7 +119,7 @@ public class Professional implements Writable {
     public boolean gotNauseatedOnMove() {
         boolean gotNOM = volatileStatus.contains(NAUSEA) && getVolatileTurns(NAUSEA) % 2 == 1;
         if (gotNOM) {
-            System.out.println(getFullName() + " was hit with nausea.");
+            Main.BATTLEMGR.log(getFullName() + " was hit with nausea.");
             takeDamage((10 * base.getStrength()) / base.getResistance(),1);
         }
         return gotNOM;
@@ -138,7 +139,7 @@ public class Professional implements Writable {
     //              Uses the move of given index, changes lastMoveUsed to given index
     public void useMove(Round round, boolean movesFirst, int i) {
         if (!gotNauseatedOnMove() && canMove()) {
-            System.out.println(getFullName() + " used " + moves[i].getName() + ".");
+            Main.BATTLEMGR.log(getFullName() + " used " + moves[i].getName() + ".");
             moves[i].use(round, movesFirst);
         }
         updateCounters(i);
@@ -253,7 +254,9 @@ public class Professional implements Writable {
             int currentValue = volatileTurns.get(i);
             Volatile currentStatus = volatileStatus.get(i);
             if (currentValue == currentStatus.getTurnLimit()) {
-                System.out.println(getFullName() + " is no longer " + currentStatus.getName() + ".");
+                if (currentStatus != CRITIC && currentStatus != FLINCH) {
+                    Main.BATTLEMGR.log(getFullName() + " is no longer " + currentStatus.getName() + ".");
+                }
                 volatileStatus.remove(i);
                 volatileTurns.remove(i);
                 i--;
@@ -268,8 +271,22 @@ public class Professional implements Writable {
     //EFFECT: changes nonVolatileStatus unless its fainted
     public void setNonVolatileStatus(NonVolatile nonVolatileStatus) {
         if (this.nonVolatileStatus != FAINT) {
-            this.nonVolatileStatus = nonVolatileStatus;
-            this.nonVolatileTurns = 0;
+            if (this.nonVolatileStatus != nonVolatileStatus) {
+                boolean currentStatus = this.nonVolatileStatus != null;
+                String msg = getFullName();
+                if (currentStatus) {
+                    msg += " is no longer " + this.nonVolatileStatus.getName();
+                }
+                if (nonVolatileStatus != null) {
+                    msg += (currentStatus ? ", but" : "") + " became " + nonVolatileStatus.getName();
+                }
+                this.nonVolatileStatus = nonVolatileStatus;
+                this.nonVolatileTurns = 0;
+                Main.BATTLEMGR.updateProfessional(msg + ".",this);
+            } else if (nonVolatileStatus != null) {
+                Main.BATTLEMGR.log(getFullName() + " is already " + nonVolatileStatus.getName());
+            }
+
         }
     }
 
@@ -334,18 +351,18 @@ public class Professional implements Writable {
     //EFFECTS: foe's life is reduced by given value (negative values mean health recovery)
     public void takeDamage(int amount, double effectiveness) {
         int realDmg = Math.min(life,Math.max(life - base.getLife(),amount));
-        System.out.println(getFullName() + (realDmg > 0 ? " lost " : " gained ") + realDmg + " life points.");
         life -= realDmg;
+        Main.BATTLEMGR.updateLife(team.getLeader(), realDmg);
         if (effectiveness == 0) {
-            System.out.println(getFullName() + " was not affected.");
+            Main.BATTLEMGR.log(getFullName() + " was not affected.");
         } else if (effectiveness < 1) {
-            System.out.println("It was a weak move.");
+            Main.BATTLEMGR.log("It was a weak move.");
         } else if (effectiveness > 1) {
-            System.out.println("It was super effective!");
+            Main.BATTLEMGR.log("It was super effective!");
         }
 
         if (life == 0) {
-            System.out.println(getFullName() + " fainted.");
+            Main.BATTLEMGR.log(getFullName() + " fainted.");
             nonVolatileStatus = FAINT;
         }
     }
@@ -380,9 +397,9 @@ public class Professional implements Writable {
         specialResistanceStage = 0;
         speedStage = 0;
 
-        Professional newUser = team.getLeader().getTeamMembers()[replacement];
-        System.out.println(newUser.getFullName() + " tapped in.");
+
         team.getLeader().setSelectedProfessional(replacement);
+        Main.BATTLEMGR.updateTapOut(team.getLeader(),this);
     }
 
     //EFFECT: Get name with leader identifier.

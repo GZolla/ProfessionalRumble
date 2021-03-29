@@ -4,6 +4,7 @@ import model.Player;
 import model.Professional;
 import model.Round;
 import model.data.Volatile;
+import ui.Main;
 
 import java.util.ArrayList;
 
@@ -19,7 +20,7 @@ public class Priority implements Effect {
     }
 
     @Override
-    //EFFECTS: if priority is 6 user becomes protected, if 3 foe flinches or if 2 user's leader looses 3 critical points
+    //EFFECTS: if priority is 6 user becomes protected, if 3 foe flinches or if 2, leader looses 12 critical points
     public void apply(Round round, boolean movedFirst) {
         switch (priority) {
             case 6:
@@ -30,7 +31,7 @@ public class Priority implements Effect {
                 break;
             case 2:
                 Player leader = round.getPlayer(movedFirst);
-                leader.setCritCounter(leader.getCritCounter() - 3);
+                leader.setCritCounter(leader.getCritCounter() - 12);
                 break;
         }
     }
@@ -41,6 +42,9 @@ public class Priority implements Effect {
     }
 
     @Override
+    //EFFECTS: return true if priority >2  and either:
+    //              priority is 3 and user moved before this round, or user used protect last round
+    //         otherwise return false
     public boolean fails(Round round, boolean movedFirst) {
         if (priority > 2) {
             ArrayList<Round> battleRounds = round.getBattle().getRounds();
@@ -55,9 +59,9 @@ public class Priority implements Effect {
                 if (lastRoundAction[0] == 0 && !wasDefeated) {
                     Professional user = round.getUser(movedFirst);
                     if (priority == 3) {
-                        System.out.println("Move failed, " + user.getFullName() + " already moved after entering.");
+                        Main.BATTLEMGR.log("Move failed, " + user.getFullName() + " already moved after entering.");
                     } else if (user.getMoves()[parseIndex(lastRoundAction[1],true)] == PROTECT) {
-                        System.out.println(user.getFullName() + " could not keep protecting itself.");
+                        Main.BATTLEMGR.log(user.getFullName() + " could not keep protecting itself.");
                     } else {
                         return false;
                     }

@@ -8,15 +8,16 @@ import persistence.SaveAble;
 import persistence.Writable;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import ui.Main;
 import ui.UserManager;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import static model.data.NonVolatile.FAINT;
 import static model.data.Volatile.CRITIC;
 import static model.data.Volatile.UNLCKY;
 import static model.effects.CriticalModifier.MAXCRITS;
-import static ui.UiManager.*;
 
 //Class represents the players, handles team management and critical attacks
 public class Player implements Writable {
@@ -42,18 +43,19 @@ public class Player implements Writable {
         this.id = data.getInt("id");
         this.team = new Team(this, data.getJSONObject("team"));
         this.criticalPoints = 0;
-        this.selectedProfessional = -1;
+        this.selectedProfessional = 0;
 
         String name = UserManager.findName(this.id);
         this.name = name == null ? "Guest" : name;
     }
 
+    //EFFECTS: load all items in either the battle's or team's file for this user
     public SaveAble[] loadAll(String type) {
         try {
             JSONArray data = new JsonReader(type + "/" + id + ".json").arrayRead();
             SaveAble[] items = new SaveAble[data.length()];
             for (int i = 0; i < data.length(); i++) {
-                if (type == "battles") {
+                if (type.equals("battles")) {
                     items[i] = new Battle(i, data.getJSONObject(i));
                 } else {
                     items[i] = new Team(this,data.getJSONObject(i));
@@ -73,17 +75,8 @@ public class Player implements Writable {
         return loadAll("teams");
     }
 
-    //EFFECTS: Prompts user to select teams
-    public int selectTeam() {
 
-        String[] names = getNames(loadTeams());
-        if (names.length == 0) {
-            System.out.println("No teams created.");
-            return 0;
-        }
-        return chooseOptions("Select a team:",names,true);
-    }
-
+    //EFFECTS: remove team with given index from file
     public void removeTeam(int index) {
         SaveAble[] teams = loadTeams();
         JSONArray jsonTeams = new JSONArray();
@@ -145,19 +138,6 @@ public class Player implements Writable {
         return loadAll("battles");
     }
 
-    //MODIFIES: this
-    //EFFECTS: Prompts the player to select a team, then sets battle properties,
-    //         if the player cancels team selection it returns false
-    public boolean readyUp() {
-        return setBattleProperties(selectTeam(),loadTeams());
-
-    }
-
-    //MODIFIES: this
-    //EFFECTS: Same effect as above but selecting from given players list of teams
-    public boolean readyUp(Player p) {
-        return setBattleProperties(p.selectTeam(),p.loadTeams());
-    }
 
     //MODIFIES: this
     //EFFECTS: checks selected is not = to teams length, (returning false if it is) and setting
@@ -167,6 +147,15 @@ public class Player implements Writable {
             return false;
         }
         team = new Team(this, teams[selected].toJson());//Ensure team is saved with this as leader
+        criticalPoints = 0;
+        selectedProfessional = 0;
+        return true;
+    }
+
+    //MODIFIES: this
+    //EFFECTS: sets team to given one, and both criticalPoints and selectedProfessional to 0
+    public boolean setBattleProperties(Team team) {
+        this.team = new Team(this, team.toJson());//Ensure team is saved with this as leader
         criticalPoints = 0;
         selectedProfessional = 0;
         return true;
@@ -186,13 +175,12 @@ public class Player implements Writable {
 
 //--- CRITICAL POINTS ----------------------------------------------------------------------------------------------
 
-    //!!!!!
-    //EFFECT: sets critPoints to given points, if outside [0,8] it corrects points to max/min accordingly
+    //EFFECT: sets critPoints to given points, if outside [0,MAXCRITS] it corrects points to max/min accordingly
     public void setCritCounter(int critPoints) {
-        critPoints = Math.max(0,Math.min(MAXCRITS,critPoints)); //Forces points into [0,8]
+        critPoints = Math.max(0,Math.min(MAXCRITS,critPoints)); //Forces points into [0,MAXCRITS]
         if (critPoints != this.criticalPoints) {
             String change = critPoints > this.criticalPoints ? "increased" : "decreased";
-            System.out.println(name + "'s critical points " + change + " to " + critPoints);
+            Main.BATTLEMGR.log(name + "'s critical points " + change + " to " + critPoints);
             this.criticalPoints = critPoints;
         }
 
@@ -200,7 +188,7 @@ public class Player implements Writable {
 
     //EFFECT: checks that the selected professional can move and crit points are full
     public boolean canUseCritical() {
-        return (criticalPoints == MAXCRITS) && team.getMembers()[selectedProfessional].canMove();
+        return (criticalPoints >= (3 * MAXCRITS) / 4) && team.getMembers()[selectedProfessional].canMove();
     }
 
     //EFFECTS: sets Professional usedCritical to true and empties critPoints
@@ -214,11 +202,36 @@ public class Player implements Writable {
     public void raiseCriticals() {
         Professional selected = team.getMembers()[selectedProfessional];
         if (!selected.hasVolatileStatus(UNLCKY)) {
-            setCritCounter(criticalPoints + 1);
+            setCritCounter(criticalPoints + MAXCRITS / 8);
         } else {
             String prompt = selected.getName() + "'s unluckiness  prevented ";
-            System.out.println(prompt + name + " from gaining critical points.");
+            Main.BATTLEMGR.log(prompt + name + " from gaining critical points.");
         }
+    }
+
+//--- PERSISTENCE ------------------------------------------------------------------------------------------------------
+    public void saveToUsers(String newPassword, String newSalt) {
+        try {
+            JSONArray users = new JsonReader("users.json").arrayRead();
+            JSONObject userData;
+            if (newPassword == null) {
+                userData =  users.getJSONObject(id);
+                userData.put("name",name);
+            } else {
+                userData = toJson();
+                userData.put("password",newPassword);
+                userData.put("salt",newSalt);
+            }
+            users.put(id,userData);
+
+            JsonWriter writer = new JsonWriter("users.json");
+            writer.open();
+            writer.writeArray(users);
+            writer.close();
+        } catch (IOException e) {
+            throw new EssentialFileFailed();
+        }
+
     }
 
 //--- ACCESSORS AND MUTATORS ---------------------------------------------------------------------------------------
@@ -260,27 +273,16 @@ public class Player implements Writable {
         return selectedProfessional;
     }
 
-    public void saveToUsers(String newPassword, String newSalt) {
-        try {
-            JSONArray users = new JsonReader("users.json").arrayRead();
-            JSONObject userData;
-            if (newPassword == null) {
-                userData =  users.getJSONObject(id);
-                userData.put("name",name);
-            } else {
-                userData = toJson();
-                userData.put("password",newPassword);
-                userData.put("salt",newSalt);
+    //EFFECTS: Checks if there are non-fainted professionals in team other than the selected professional
+    public boolean hasAbleReplacements() {
+        Professional[] members = team.getMembers();
+        for (int i = 0; i < members.length; i++) {
+            if (members[i].getNonVolatileStatus() != FAINT && i != selectedProfessional) {
+                return true;
             }
-            users.put(id,userData);
-
-            JsonWriter writer = new JsonWriter("users.json");
-            writer.open();
-            writer.writeArray(users);
-            writer.close();
-        } catch (IOException e) {
-            throw new EssentialFileFailed();
         }
-
+        return false;
     }
+
+
 }

@@ -4,6 +4,7 @@ import model.data.ProfessionalBase;
 import model.effects.CriticalModifier;
 import model.effects.StatusInflictor;
 import model.moves.Damaging;
+import model.moves.Move;
 import model.moves.NonDamaging;
 import org.junit.jupiter.api.Test;
 import ui.TableAble;
@@ -39,55 +40,49 @@ public class TableAbleTest {
         String[] row1 = MANUAL.toRow();
         assertEquals(Branch.values().length + 1,row1.length);
         assertEquals(MANUAL.getName(),row1[0]);
-        for (int i = 0; i < row1.length - 1; i++) {
-            assertEquals(MANUAL.getEffectiveness(i) + "",row1[i + 1]);
-        }
+        assertArrayEquals(new String[]{
+                MANUAL.getName(),
+                "1", "1", "0.5", "1", "1", "1", "1", "2", "2", "1", "0.5", "1", "1", "0.5", "2", "1"
+        },row1);
 
         String[] row2 = TECHNO.toRow();
-        assertEquals(Branch.values().length + 1,row2.length);
-        assertEquals(TECHNO.getName(),row2[0]);
-        for (int i = 0; i < row2.length - 1; i++) {
-            assertEquals(TECHNO.getEffectiveness(i) + "",row2[i + 1]);
-        }
+        assertArrayEquals(new String[]{
+                TECHNO.getName(),
+                "0.5", "0.5", "1", "2", "1", "1", "2", "1", "2", "0", "1", "2", "1", "1", "1", "1"
+        },row2);
 
         String[] row3 = UNEMP.toRow();
         assertEquals(2, row3.length);
         assertEquals(UNEMP.getName(),row3[0]);
         assertEquals(UNEMP.getDescription(),row3[1]);
 
-        String[] ceo = new String[]{"0","CEO",CORPOR.getName(),"70","70","85","110","100","100"};
-        for (int i = 0; i < ceo.length; i++) {
-            String[] row = CEO.toRow();
-            assertEquals(ceo[i],row[i]);
-        }
+        String[] ceo = new String[]{"CEO",CORPOR.getName(),"","70","70","85","110","100","100"};
+        assertArrayEquals(ceo,CEO.toRow());
 
 
-        String[] cs = new String[]{"38","Computer scientist",TECHNO.getName(),"100","50","60","110","140","75"};
-        for (int i = 0; i < cs.length; i++) {
-            String[] row = COMPUTER_SCIENTIST.toRow();
-            assertEquals(cs[i],row[i]);
-        }
+        String[] ent = new String[]{"Comedian",ENTERT.getName(),LETTER.getName(),"100","50","80","105","105","100"};
+        assertArrayEquals(ent,COMEDIAN.toRow());
     }
 
     @Test
     public void testToRowMoves() {
-        areEqual(new String[]{"0", "Dominate", SPORT.name(), "100", "Special", "-"},DOMINATE.toRow());//null
+        assertArrayEquals(new String[]{"Dominate", SPORT.name(), "100", "Special", "-"},DOMINATE.toRow());//null
         //null but physical:
-        areEqual(new String[]{"2","Keyboard slam",TECHNO.getName(),"100","Physical", "-"},KEYBOARD_SLAM.toRow());
+        assertArrayEquals(new String[]{"Keyboard slam",TECHNO.getName(),"100","Physical", "-"},KEYBOARD_SLAM.toRow());
         //Different power + effect
         String effDesc = new StatusInflictor(UNEMP,2).getDescription();
-        areEqual(new String[]{"89","Malware",TECHNO.getName(),"80","Special", effDesc},MALWARE.toRow());
+        assertArrayEquals(new String[]{"Malware",TECHNO.getName(),"80","Special", effDesc},MALWARE.toRow());
         //Status
-        areEqual(new String[]{
-                "1","Shame",ENVIRO.getName(), new CriticalModifier(-MAXCRITS).getDescription()
+        assertArrayEquals(new String[]{
+                "Shame",ENVIRO.getName(),"-","Status", new CriticalModifier(-MAXCRITS).getDescription()
         },SHAME.toRow());
     }
 
     @Test
     public void testEffectDescriptions() {
         //CriticalModifier
-        assertEquals("User's critical points are reduced by 2 points.", GMO_GUT_PUNCH.getEffect().getDescription());
-        assertEquals("User's critical points are increased by 6 points.",TEST_CRASH.getEffect().getDescription());
+        assertEquals("User's critical points are reduced by 8 points.", GMO_GUT_PUNCH.getEffect().getDescription());
+        assertEquals("User's critical points are increased by 24 points.",TEST_CRASH.getEffect().getDescription());
         assertEquals("Opponent's critical points are reduced by 32 points.",SHAME.getEffect().getDescription());
         assertEquals(
                 "If the foe is not defeated after this move, user takes 2/3 of the damage caused to foe as recoil.",
@@ -118,27 +113,27 @@ public class TableAbleTest {
 
         assertEquals(Branch.values().length + 1,headers.length);
 
-        assertEquals("V Attacker \\ Defender >",headers[0]);
+        assertEquals("Attacker \\ Defender",headers[0]);
         for (int i = 0; i < branches.length; i++) {
-            assertEquals(branches[i].name(), headers[i + 1]);
+            assertEquals(branches[i].name().substring(0,3), headers[i + 1]);
         }
 
         String[] headersNV = UNEMP.getHeaders();
-        areEqual(new String[]{"Name","Description"},headersNV);
+        assertArrayEquals(new String[]{"Name","Description"},headersNV);
 
         String[] headersPB = CENTRAL_BANK_CHAIR.getHeaders();
-        areEqual(new String[] {
-                "ID","Name","Branch","Life","Strength","Resistance","Special Strength","Special Resistance","Speed"
+        assertArrayEquals(new String[] {
+                "Name","Branches","","Life","Strength","Resistance","Special Strength","Special Resistance","Speed"
         },headersPB);
 
         String[] headersDMG = ICBM_STRIKE.getHeaders();
-        areEqual(new String[] {
-                "ID","Name","Branch","Power","Type","Added Effect"
+        assertArrayEquals(new String[] {
+                "Name","Branch","Power","Type","Added Effect"
         },headersDMG);
 
         String[] headersSTS = HYPEREXAMINE.getHeaders();
-        areEqual(new String[] {
-                "ID","Name","Branch","Added Effect"
+        assertArrayEquals(new String[] {
+                "Name","Branch","Power","Type","Added Effect"
         },headersSTS);
 
 
@@ -159,19 +154,8 @@ public class TableAbleTest {
         testBothStatics(ProfessionalBase.values());
 
         //Moves
-        testBothStatics(Damaging.values());
-        testBothStatics(NonDamaging.values());
+        testBothStatics(Move.listAllMoves());
 
-    }
-
-    //EFFECTS: checks that both given String[] are equal
-    public static void areEqual(String[] a, String[] b) {
-        if (a.length != b.length) {
-            fail();
-        }
-        for (int i = 0; i < a.length; i++) {
-            assertEquals(a[i],b[i]);
-        }
     }
 
     //EFFECTS: calls both methods that check static behaviour
@@ -187,7 +171,7 @@ public class TableAbleTest {
             String[] headers = values[i].getHeaders();
             for (int j = 0; j < values.length; j++) {
                 String[] headers2 = values[j].getHeaders();
-                areEqual(headers,headers2);
+                assertArrayEquals(headers,headers2);
             }
         }
     }

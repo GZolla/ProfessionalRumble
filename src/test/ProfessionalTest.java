@@ -146,16 +146,16 @@ public class ProfessionalTest {
     @Test
     //EFFECTS: test getMoveNames and setMove methods
     public void testGetMoveNamesAndSetMove() {
-        TableAbleTest.areEqual(
+        assertArrayEquals(
                 new String[]{"Breakthrough blast","Compromise network","Keyboard slam","Slapstick smack"},
                 team2.getMembers()[0].getMoveNames()
         );
-        TableAbleTest.areEqual(
+        assertArrayEquals(
                 new String[]{"Psychological torture","Accelerate","Friendly match","Momentum collision"},
                 team1.getMembers()[5].getMoveNames()
         );
         team1.getMembers()[5].setMove(3,LANDMINE);
-        TableAbleTest.areEqual(
+        assertArrayEquals(
                 new String[]{"Psychological torture","Accelerate","Friendly match","Landmine"},
                 team1.getMembers()[5].getMoveNames()
         );

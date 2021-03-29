@@ -2,77 +2,15 @@ package ui;
 
 import persistence.Writable;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.Scanner;
+
+import static javax.swing.JOptionPane.showMessageDialog;
 
 //A set of tools for command line ui
 public class UiManager {
 
-    //EFFECTS: Prints prompt and asks for nextLine
-    public static String prompt(String prompt) {
-        System.out.print(prompt);
-        Scanner sc = new Scanner(System.in);
-        return sc.nextLine();
-    }
-
-    //EFFECTS: Displays options, returns answer of user(insists on valid input)
-    public static int chooseOptions(String prompt,String[] options,boolean addReturn) {
-        String optionDisplay = "";
-        for (int i = 0; i < options.length; i++) {
-            optionDisplay += i + ": " + options[i] + "\n";
-        }
-        if (addReturn) {
-            optionDisplay += options.length + ": Return \n";
-        }
-        Scanner sc = new Scanner(System.in);
-
-        while (true) {
-            System.out.println(prompt);
-            System.out.print(optionDisplay);
-            try {
-                int response = sc.nextInt();
-                if (response >= 0 && response < options.length + (addReturn ? 1 : 0)) {
-                    return response;
-                } else {
-                    System.out.println(response + " is not one of the options.");
-                }
-            } catch (java.util.InputMismatchException e) {
-                System.out.println("Input must be an integer");
-                sc.next();
-            }
-        }
-    }
-
-    //EFFECTS: Calls chooseOptions but based on a array of TableAble
-    public static int chooseOptions(String prompt,TableAble[] options,boolean addReturn) {
-        String[] stringArray = new String[options.length];
-        for (int i = 0; i < options.length; i++) {
-            stringArray[i] = options[i].getName();
-        }
-        return chooseOptions(prompt,stringArray,addReturn);
-    }
-
-    //EFFECTS: Asks for an input in [0,limit] or -1 to signify cancel if set addCancel == true
-    public static int largeOptions(String prompt, int limit,boolean addCancel) {
-        if (addCancel) {
-            prompt += " Or input -1 to cancel.";
-        }
-        Scanner sc = new Scanner(System.in);
-
-        while (true) {
-            System.out.println(prompt);
-            try {
-                int response = sc.nextInt();
-                if (response >= (addCancel ? -1 : 0) && response < limit) {
-                    return response;
-                } else {
-                    System.out.println(response + " is not one of the options.");
-                }
-            } catch (java.util.InputMismatchException e) {
-                System.out.println("Input must be an integer");
-                sc.next();
-            }
-        }
-    }
 
 
 
@@ -149,6 +87,26 @@ public class UiManager {
             names[i] = objects[i].getName();
         }
         return names;
+    }
+
+    //CITATION: https://stackoverflow.com/questions/4627553/show-jframe-in-a-specific-screen-in-dual-monitor-configuration
+    //MODIFIES: frame
+    //EFFECTS: Show JFrame in second monitor
+    public static void showOnSecondScreen(JFrame frame) {
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice[] gd = ge.getScreenDevices();
+        if (gd.length > 0) {
+            GraphicsConfiguration a = gd[1 < gd.length ? 1 : 0].getDefaultConfiguration();
+            frame.setLocation(a.getBounds().x, a.getBounds().y + frame.getY());
+            frame.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
+        } else {
+            throw new RuntimeException("No Screens Found");
+        }
+    }
+
+    //EFFECTS: show the message with the given title
+    public static void showMessage(JFrame parent,String message, String title) {
+        showMessageDialog(parent,message,title,JOptionPane.PLAIN_MESSAGE);
     }
 
 

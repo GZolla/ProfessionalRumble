@@ -1,11 +1,8 @@
-import model.Player;
-import model.Professional;
-import model.Round;
-import model.Team;
+import model.*;
 import model.data.ProfessionalBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import model.Battle;
+import ui.Main;
 
 import static model.data.NonVolatile.DEPRE;
 import static model.data.NonVolatile.UNEMP;
@@ -29,9 +26,8 @@ public class MoveTest {
     public void runBefore() {
         player1 = new Player(-1,"Test1");
         player2 = new Player(-2,"Test2");
-        Team[] teamSetter = new Team[] {new Team(player1,"Team1"),new Team(player2,"Team2")};
-        player1.setBattleProperties(0,teamSetter);
-        player2.setBattleProperties(1,teamSetter);
+        player1.setBattleProperties(new Team(player1,"Team1"));
+        player2.setBattleProperties(new Team(player2,"Team2"));
 
         battle = null;
     }
@@ -47,8 +43,8 @@ public class MoveTest {
         Professional target = player2.getSelectedProfessional();
         assertEquals(KEYBOARD_SLAM.getDamage(user,target),target.getBase().getLife() - target.getLife());
         assertEquals(DOMINATE.getDamage(target,user),user.getBase().getLife() - user.getLife());
-        assertEquals(1,player1.getCritCounter());
-        assertEquals(1,player2.getCritCounter());
+        assertEquals(4,player1.getCritCounter());
+        assertEquals(4,player2.getCritCounter());
 
     }
 
@@ -62,7 +58,7 @@ public class MoveTest {
         Professional target = player2.getSelectedProfessional();
         assertEquals(FRIENDLY_MATCH.getDamage(user,target),target.getBase().getLife() - target.getLife());
 
-        assertEquals(7,player1.getCritCounter());
+        assertEquals(28,player1.getCritCounter());
         assertEquals(MAXCRITS,player2.getCritCounter());
     }
 
@@ -192,7 +188,7 @@ public class MoveTest {
 
         runRound(3,0);
         int dmg = LIGHTSPE_KICK.getDamage(coach,dictator);
-        assertEquals(8,player2.getCritCounter());//No reduction in crit points + raiseCriticals was not called
+        assertEquals(4,player2.getCritCounter());//Reduction of crit points + raiseCriticals was not called
         assertEquals(dmg,DICTATOR.getLife() - dictator.getLife());
 
         round = runRound(0,-1);
@@ -258,6 +254,7 @@ public class MoveTest {
         player1.setSelectedProfessional(prof1);
         player2.setSelectedProfessional(prof2);
         battle = new Battle(player1,player2);
+        Main.BATTLEMGR.setBattle(battle);
     }
 
     //EFFECTS: runs a single round selecting moves of the given indexes

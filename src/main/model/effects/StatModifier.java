@@ -3,6 +3,7 @@ package model.effects;
 import model.Professional;
 import model.Round;
 import model.data.Stat;
+import ui.Main;
 
 
 //Effect that changes the stages of target professional, or set a counter do apply the effect later
@@ -44,7 +45,7 @@ public class StatModifier extends CounterSetter {
 
             if (newStage != oldStage) {
                 String prompt = target.getFullName() + "'s " + stat.getName() + (newStage > oldStage ? " in" : " de");
-                System.out.println(prompt + "creased" + (stages > 1 ? " drastically." : "."));
+                Main.BATTLEMGR.log(prompt + "creased" + (stages > 1 ? " drastically." : "."));
             }
             target.setStage(stat,newStage);
         }

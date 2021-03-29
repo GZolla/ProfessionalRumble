@@ -52,6 +52,7 @@ public class PersistenceTest {
 
         Player guest = new Player(-1,"Guest");
         guest.setBattleProperties(0,teams);
+
         new Battle(test1,guest).save();
 
         battles = test1.loadBattles();

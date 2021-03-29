@@ -2,6 +2,7 @@ package model.effects;
 
 import model.Professional;
 import model.Round;
+import ui.Main;
 
 import static model.data.NonVolatile.FAINT;
 import static model.data.NonVolatile.UNEMP;
@@ -24,10 +25,9 @@ public class DefeatCondition implements Effect {
         if (foe.getNonVolatileStatus() != FAINT) {
             String pre = "After failing to defeat " + foe.getName() + " " + user.getName();
             if (causeUMP) {
-                System.out.println(pre + " became unemployed.");
                 user.setNonVolatileStatus(UNEMP);
             } else {
-                System.out.println(pre + " suffered recoil.");
+                Main.BATTLEMGR.log(pre + " suffered recoil.");
                 user.takeDamage((2 * round.getUsedMoveDamage(movedFirst)) / 3,1);
             }
         }

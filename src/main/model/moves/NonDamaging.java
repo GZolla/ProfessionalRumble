@@ -34,9 +34,9 @@ public enum NonDamaging implements Move {
     CONFUSING_PROBLEM("Confusing problem",NUMBER,new StatusInflictor(NAUSEA,0));
 
 
-    private String name;
-    private Branch branch;
-    private Effect effect;
+    private final String name;
+    private final Branch branch;
+    private final Effect effect;
 
     NonDamaging(String name, Branch branch, Effect effect) {
         this.name = name;
@@ -59,7 +59,10 @@ public enum NonDamaging implements Move {
         return effect;
     }
 
-
+    @Override
+    public String toString() {
+        return name;
+    }
 
 //--- TABLE ABLE METHODS -----------------------------------------------------------------------------------------------
     @Override
@@ -73,21 +76,19 @@ public enum NonDamaging implements Move {
     }
 
     @Override
-    //EFFECTS: Return name, branch, and description of effect in a String array
+    //EFFECT:Return name, branch, power as "-", type as "Status", and effect description in a String array
     public String[] toRow() {
-        return new String[]{getIndex() + "", name, branch.getName(),effect.getDescription()};
+        return new String[]{
+                name,
+                branch.getName(),
+                "-",
+                "Status",
+                effect.getDescription()
+        };
     }
 
-    @Override
-    //EFFECT: Return the headers for the table displaying values of Status
-    public String[] getHeaders() {
-        return new String[]{"ID","Name","Branch","Added Effect"};
-    }
 
-    @Override
-    public TableAble[] getValues() {
-        return NonDamaging.values();
-    }
+
 
 
 

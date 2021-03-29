@@ -5,6 +5,8 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 
 import static ui.gui.CustomBagConstraints.customConstraint;
+import static ui.gui.Style.PADDING;
+import static ui.gui.Style.getButtonStyle;
 
 public class CustomForm extends JPanel {
     public enum Row {
@@ -13,8 +15,10 @@ public class CustomForm extends JPanel {
 
     private static Font FONT = new Font("sans serif",Font.PLAIN,48);
 
+
     public CustomForm(Row[] rows, String buttonText, ActionListener listener) {
         super(new GridBagLayout());
+        setBackground(Color.WHITE);
 
         Insets insets = new Insets(20,20,20,20);
         GridBagConstraints labelConstraint = customConstraint(0,0,insets);
@@ -31,7 +35,7 @@ public class CustomForm extends JPanel {
 
         JButton button = new JButton(buttonText);
         button.addActionListener(listener);
-        button.setFont(FONT);
+        getButtonStyle(48).applyToComponent(button);
         add(button,customConstraint(0,rows.length,2,1));
     }
 

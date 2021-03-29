@@ -1,11 +1,11 @@
 package model.moves;
 
-import model.Professional;
 import model.Round;
-import model.data.Branch;
-import model.data.Status;
 import model.effects.Effect;
 import ui.TableAble;
+
+import java.util.Arrays;
+import java.util.Comparator;
 
 public interface Move extends TableAble {
     public void use(Round round, boolean movedFirst);
@@ -21,19 +21,29 @@ public interface Move extends TableAble {
         }
     }
 
-    public static String[] listAllMoves() {
+
+
+    @Override
+    //EFFECT: Return the headers displaying all values of Damaging
+    default String[] getHeaders() {
+        return new String[]{"Name","Branch","Power","Type","Added Effect"};
+    }
+
+    public static Move[] listAllMoves() {
         Damaging[] damaging = Damaging.values();
         NonDamaging[] nonDamaging = NonDamaging.values();
-        String[] moves = new String[damaging.length + nonDamaging.length];
+        Move[] moves = new Move[damaging.length + nonDamaging.length];
 
-        for (int i = 0; i < damaging.length; i++) {
-            moves[i] = damaging[i].getName();
-        }
-        for (int i = 0; i < nonDamaging.length; i++) {
-            moves[i + damaging.length] = nonDamaging[i].getName();
-        }
+        System.arraycopy(damaging, 0, moves, 0, damaging.length);
+        System.arraycopy(nonDamaging, 0, moves, damaging.length, nonDamaging.length);
 
+        Arrays.sort(moves, Comparator.comparing(Move::getName));
         return moves;
+    }
+
+    @Override
+    default TableAble[] getValues() {
+        return listAllMoves();
     }
 
 

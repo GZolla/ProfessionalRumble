@@ -4,6 +4,7 @@ import model.Professional;
 import model.Round;
 import model.moves.Move;
 import model.moves.NonDamaging;
+import ui.Main;
 
 
 import static model.data.Volatile.CHARGE;
@@ -63,7 +64,7 @@ public class FailCondition implements Effect {
             message = "Foe's damage broke " + user.getFullName() + "'s concentration.";
         }
         if (message != "") {
-            System.out.println(message);
+            Main.BATTLEMGR.log(message);
             return true;
         }
         return false;

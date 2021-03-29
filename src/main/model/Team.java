@@ -1,5 +1,7 @@
 package model;
 
+import model.Player;
+import model.Professional;
 import model.moves.Move;
 import persistence.SaveAble;
 import org.json.JSONArray;

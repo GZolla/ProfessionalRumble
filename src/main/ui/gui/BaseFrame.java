@@ -12,7 +12,7 @@ public class BaseFrame extends JFrame {
     protected Player player;
     protected BaseFrame prev;
 
-    public BaseFrame(String title, Color bgColor, BaseFrame prev) {
+    public BaseFrame(String title, BaseFrame prev) {
         if (prev != null) {
             prev.setVisible(false);
             this.player = prev.player;
@@ -21,11 +21,10 @@ public class BaseFrame extends JFrame {
         setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
         setTitle("Professional Rumble | " + title);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(600,900);
         setVisible(true);
         setResizable(false);
 
-        getContentPane().setBackground(bgColor);
+        getContentPane().setBackground(Color.WHITE);
     }
 
 

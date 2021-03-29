@@ -4,20 +4,20 @@ import model.data.Stat;
 import model.data.Volatile;
 import model.moves.Damaging;
 import model.moves.Move;
-import persistence.Writable;
+import model.Battle.Result;
 import org.json.JSONObject;
+import ui.Main;
+
 
 import static model.data.NonVolatile.*;
 
 import static model.moves.Damaging.LANDMINE;
-import static ui.BattleManager.handleWage;
-import static ui.BattleManager.selectProfessional;
-import static ui.UiManager.largeOptions;
+
 
 
 //A round of a battle, handles order and holds data for the round
-public class Round implements Writable {
-    private Battle battle;
+public class Round {
+    private final Battle battle;
     private Player first;
     private Player second;
     private int[] actionFirst;
@@ -61,7 +61,7 @@ public class Round implements Writable {
             if (priorityDifference == 0) {
                 double speDiff = prof1.getRealStat(Stat.SPE,false) - prof2.getRealStat(Stat.SPE,false);
                 if (speDiff == 0) {
-                    return openWager((int) Math.floor(p1[0] / 3), (int) Math.floor(p2[0] / 3));
+                    return openWager(p1[0] / 2,p2[0] / 2);
                 } else {
                     return speDiff > 0;
                 }
@@ -92,18 +92,18 @@ public class Round implements Writable {
 
 
         int wager1;
-        if (storedWage1 > 0) {
+        if (storedWage1 > 1) {
             wager1 = storedWage1 - 1;
         } else {
-            wager1  = handleWage(getPlayer(true));
-            actionFirst[0] += wager1;
+            wager1  = Main.BATTLEMGR.handleWage(getPlayer(true));
+            actionFirst[0] += (wager1 + 1) * 2;
         }
         int wager2;
-        if (storedWage2 > 0) {
+        if (storedWage2 > 1) {
             wager2 = storedWage1 - 1;
         } else {
-            wager2 = handleWage(getPlayer(true));
-            actionSecond[0] += wager1;
+            wager2 = Main.BATTLEMGR.handleWage(getPlayer(false));
+            actionSecond[0] += (wager2 + 1) * 2;
         }
 
         if (wager1 == wager2) {
@@ -118,32 +118,16 @@ public class Round implements Writable {
 
 
 
-    public int handleAll() {
-        System.out.println("--------------------------------------------------------");
+    public void handleAll() {
         reorder();
-        boolean p1WentFirst = wentFirst(battle.getPlayer1());
-        boolean secondFainted = handleAction(true);
-        int result = -1;
-
-        if (!secondFainted) {
-            handleAction(false);
-            if (getUser(true).getNonVolatileStatus() == FAINT) {
-                result = p1WentFirst ? 1 : 0;//second did not faint and p1 was defeated
-            } else {
+        if (handleAction(true)) {
+            if (handleAction(false)) {
                 first.getSelectedProfessional().checkEndTurn();
             }
             second.getSelectedProfessional().checkEndTurn();
         } else {
             first.getSelectedProfessional().checkEndTurn();
         }
-
-        if (getUser(false).getNonVolatileStatus() == FAINT) {
-            result = p1WentFirst ? 0 : 1; //player 2 was defeated
-        }
-        System.out.println(getUser(true).getFullName() + ": " + getUser(true).getLife());
-        System.out.println(getUser(false).getFullName() + ": " + getUser(false).getLife());
-        battle.setResult(result);
-        return result;//neither player was defeated
     }
 
     public boolean handleAction(boolean handlingFirst) {
@@ -151,17 +135,15 @@ public class Round implements Writable {
 
         Professional user = getUser(handlingFirst);
         int[] action = handlingFirst ? actionFirst : actionSecond;
-        boolean result = false;
         if (action[0] == 1) {
-            System.out.println(user.getFullName() + " tapped out.");
+            Main.BATTLEMGR.log(user.getFullName() + " tapped out.");
             user.tapOut(action[1]);
         } else {
-            user.useMove(this,handlingFirst, parseIndex(action[1],true)); //*
-            result = handleFaint(handlingFirst,parseIndex(action[1],false));
+            user.useMove(this,handlingFirst, parseIndex(action[1],true));
+            return handleFaint(handlingFirst, parseIndex(action[1], false));
 
         }
-        System.out.println("\n");
-        return result;
+        return true;
 
 
     }
@@ -171,16 +153,17 @@ public class Round implements Writable {
         Professional opponent = getUser(!first);
         if (opponent.getNonVolatileStatus() == FAINT) {
             if (newProfInd < -1) {
-                newProfInd = selectProfessional(getPlayer(!first));
-                int oldIndex = (first ? actionFirst : actionSecond)[1];
-                (first ? actionFirst : actionSecond)[1] = parseIndex(oldIndex,true) + 4 * (newProfInd + 2);
-            }
-            if (newProfInd != -1) {
+                if (getPlayer(!first).hasAbleReplacements()) {
+                    Main.BATTLEMGR.chooseProfessional(getPlayer(!first));
+                } else {
+                    battle.setResult(wentFirst(battle.getPlayer1()) ^ first ? Result.P2WIN : Result.P1WIN);
+                }
+            } else {
                 opponent.tapOut(newProfInd);
             }
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
     //EFFECTS: parses the move index:
@@ -257,7 +240,6 @@ public class Round implements Writable {
         return first.getId() == p.getId();
     }
 
-    @Override
     public JSONObject toJson() {
         JSONObject json = new JSONObject();
 
@@ -270,15 +252,10 @@ public class Round implements Writable {
             actions = new int[][]{actionSecond,actionFirst};
         }
         for (int i = 0; i < actions.length; i++) {
-            json.put("P" + i + "action",actions[i][0]);
-            json.put("P" + i + "index",actions[i][1]);
+            json.put("P" + (i + 1) + "action",actions[i][0]);
+            json.put("P" + (i + 1) + "index",actions[i][1]);
         }
 
         return json;
-    }
-
-    @Override
-    public String getName() {
-        return null;
     }
 }

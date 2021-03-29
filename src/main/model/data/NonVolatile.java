@@ -2,21 +2,27 @@ package model.data;
 
 import ui.TableAble;
 
+import java.awt.*;
+
 //NonVolatile Status that a professional can have, each has its own effect
 public enum NonVolatile implements Status, TableAble {
-    UNEMP("Unemployed","Cannot move, lasts 2 turns"),
-    SICK("Sick","After every turn, x/16 of its base life is lost where x is turns since sick"),
-    DEMOR("Demoralised","Cannot move every other turn, speed is halved"),
-    INJUR("Injured","After every turn 1/16 of its base life is lost, strength is halved"),
-    DEPRE("Depressed","After every turn 1/16 of its base life is lost, special strength is halved"),
-    FAINT("Fainted","Represents a defeated professional");
+    UNEMP("Unemployed","Cannot move, lasts 2 turns", new Color(20,20,100)),
+    SICK("Sick","After every turn, x/16 of its base life is lost where x is turns since sick", new Color(20,120,250)),
+    DEMOR("Demoralised","Cannot move every other turn, speed is halved", new Color(80,80,80)),
+    INJUR("Injured","After every turn 1/16 of its base life is lost, strength is halved", new Color(120,20,20)),
+    DEPRE(
+    "Depressed","After every turn 1/16 of its base life is lost, special strength is halved", new Color(70,0,150)
+    ),
+    FAINT("Fainted","Represents a defeated professional", new Color(20,20,20));
 
     private final String name;
     private final String description;
+    private final Color color;
 
-    NonVolatile(String name, String description) {
+    NonVolatile(String name, String description, Color color) {
         this.name = name;
         this.description = description;
+        this.color = color;
     }
 
     @Override
@@ -26,6 +32,10 @@ public enum NonVolatile implements Status, TableAble {
 
     public String getDescription() {
         return description;
+    }
+
+    public Color getColor() {
+        return color;
     }
 
 //--- TABLE ABLE METHODS -----------------------------------------------------------------------------------------------
