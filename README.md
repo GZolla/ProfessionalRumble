@@ -14,6 +14,7 @@ Moves can:
 Based on pokemon battles, its target audience is those that seek a similar game based purely on strategy, and not randomness.
 This is a collective idea I had with a friend but would love give it *actual* life through a desktop app.
 
+
 ##User Stories
  - As a user, I would like to customise the moves given to a professional.
  - As a user, I would like to add professionals to a team of professionals.
@@ -26,7 +27,13 @@ This is a collective idea I had with a friend but would love give it *actual* li
  - As a user, I would like to be able to save battles to a file 
  - As a user, I would like to be able to have credential to access my personal teams
  
- 
+##Phase 4: Task 2
+Option 2:
+
+Both StatModifier and StatusInflictor extend the abstract class CounterSetter, the class has protected fields chargeTurns and windowTurns;
+ the class also implements the method apply overridden from the effect interface. 
+ Declares the abstract method finalApply which is implemented in each subclass.
+
  ##Sources For Images in data/icons:
  
  - 0: https://www.pngkey.com/maxpic/u2w7y3t4o0e6t4e6/
