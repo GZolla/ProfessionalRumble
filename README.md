@@ -33,7 +33,20 @@ Option 2:
 Both StatModifier and StatusInflictor extend the abstract class CounterSetter, the class has protected fields chargeTurns and windowTurns;
  the class also implements the method apply overridden from the effect interface. 
  Declares the abstract method finalApply which is implemented in each subclass.
-
+ 
+##Phase 4: Task 3
+  - The whole Round class could be refactored:
+    - It holds fields for two players that are the same as the ones in its battle field, so a boolean stating who is first could be stored instead of those fields
+    - Both Move and Effect receive a Round in their methods, this is just the last round of the active battle, instead of a parameter, this methods could retrieve this round using the final BATTLEMGR.
+    - To improve cohesion, a class Action could be created to parse the actions of the players and compare with each other to determine who goes first.
+  - Priority and FailCondition are weirdly structure to handle similar responsibilities:
+    - Priority could handle returning priority and final apply, while fail condition could handle all fail conditions
+    - This means a third class could be chosen that contains a Priority and a FailCondition class to mix this effects
+  - Since CustomForm handles only login and signup forms, this responsibilities could be handled in that class leaving UserManager to handle only the display
+  - Team could iterable on its members and Battle on its rounds
+  - A single HashMap that has Volatile keys and Integer values could be used to identify what Volatile statuses a professional has and the corresponding volatileTurns
+  
+ 
  ##Sources For Images in data/icons:
  
  - 0: https://www.pngkey.com/maxpic/u2w7y3t4o0e6t4e6/

@@ -8,5 +8,10 @@
         "password": "bead433c9dc82607fbd779fa4b21098d8a4f8ef944832ab265772eb3939c3845",
         "salt": "�q�H��n���!$}���",
         "name": "Test2"
+    },
+    {
+        "password": "b6394710e0b0ddb1410322124f3e1df1461566c28b6206d168314a5120f6db0e",
+        "salt": "|E�I(\u0007�[�~�\u0016��S\u0003",
+        "name": "Test4"
     }
 ]
